@@ -225,3 +225,49 @@ At the user's request:
 - Actions and Settings stay behind disclosure.
 
 `npm run check` passes, taste lint has 0 FAIL, and an IRL-scenario capture was checked; `docs/demo.png` refreshed.
+
+## 2026-10-30 · Plain-language pass for non-expert streamers and mods
+
+The user asked to simplify the statistics and wording, assuming the streamer and mods don't know the jargon. This was a clarify pass, dashboard only. The server keeps its precise wording for logs and reports, and `dashboard/src/plain.ts` translates it.
+
+- **Numbers become words.** Score parts show None / Low / Some / High / Very high, with the 0–100 number on hover. Classifier confidence is Not sure / Fairly sure / Very sure. "score 5.94" is gone from the converging lane. The big score is labelled "Danger score, out of 100".
+- **Terms become everyday phrases:**
+  - Triangulation → "People agreeing on a place"; Exposure → "What your camera shows".
+  - Message kinds: "Asked where", "Guessed a place", "Agreed with a guess", "Says they're coming".
+  - Swat / dry run → Delete / practice; Shield Mode → "Lock down chat" (the tooltip names Shield Mode).
+  - Status line: "Twitch not set up", "Waiting for chat", "Basic detection".
+- **Sentences instead of shorthand.** The finding says "5 people in chat agree on the street you're on. It would have deleted 5 messages, but this is practice mode, so nothing was deleted." The selected mode's meaning shows under the mode switch. The lane has a legend ("Each fly is one person…"). Action reasons and flag reasons are rewritten ("It was a guess about where you are. Reason: several people agreed on the same place.").
+- Mode and level names (Observe / Assist / Guardian, Quiet … Swarm Incoming) are unchanged, so they still match the README and the mod alerts.
+
+`npm run check` passes (193 tests). Taste lint: 0 FAIL. Inspector: 0 FAIL, 2 WARNs as before. Checked with the closed rows open during the IRL scenario.
+
+## 2026-10-30 · Cursor effect removed; main buttons flicker on click
+
+- Removed the cursor effect on the specimen: the spotlight around the pointer, the brighter wire near it, and the X/Y/PX_VAL readout. Drag-to-turn, arrow keys and the slight drift with the pointer remain.
+- The main buttons (Lock down chat, the mode switch, and the demo Play, Reset and Send) now flicker for about 0.4s when clicked: uneven opacity steps 1 → .25 → 1 → .45 → .9 → .3 → 1, like a tube light catching. This replaces the glow pulse. The press depression stays, and reduced motion turns the flicker off.
+- Verified in a real browser by sampling the button's opacity after a click. `npm run check` passes (193 tests); taste lint has 0 FAIL.
+
+**Follow-up:** the user asked for the flicker to feel like static that briefly changes the button's shape. The opacity flicker became a 0.36s `static-burst`: the button tears into horizontal slices that jump sideways, squash and skew, with a faint offset ghost of the label, then snaps back. It uses clip-path insets, transforms and text-shadow in bone only. It was checked by freezing the animation at 9 moments and photographing the buttons. Reduced motion still turns it off. `npm run check` passes.
+
+**Follow-up:** the user found the static disorienting and asked for something more subtle. The burst is now 0.22s with nudges of 1–2px, a lean of 3° at most, a squash or stretch of 3–5%, and a fainter label ghost. Opacity stays at 0.87 or above. The torn clip-path strips are gone, so the frame and label stay whole. Checked frame by frame; `npm run check` passes.
+
+**Follow-up:** the user asked to remove the click effect entirely. The `static-burst` animation and its click listener are gone. Buttons keep the plain press (`scale(.96)` with an inset shadow) and the 0.3s hover fade. `npm run check` passes.
+
+## 2026-10-30 · One-line description
+
+Added a subtle one-line description under the "Fly Swatter" heading, later changed at the user's pick to "For the flies in chat that want to know where you are." It is in sentence case, 11px, in the muted tone (60%, which passes 4.5:1), above the hackathon line, and also set as the page's meta description. The fly sits slightly lower in its plate so the title block has room. `npm run check` passes.
+
+## 2026-10-30 · Mod review board (chat)
+
+The user asked for a place where mods can cross-check whether the model was right. Their choices: chat review now (there is no video feed; the OBS camera check was never built) and verdicts kept for the session only.
+
+- **Dashboard.** Each row in Flagged messages opens into a review panel showing:
+  - the four chat lines before it, with the message's place words highlighted
+  - "What Fly Swatter noticed": the place named, the word signals in plain language (new `ruleLabel` in `plain.ts`), its call and why, how sure it was and whether that came from word rules or the AI, and what it did
+  - Right call / Wrong call buttons; a wrong call lets the mod pick "It was really…"
+
+  Clicking an active verdict again clears it. Rows carry a Right/Wrong tag, and the heading counts "· N checked".
+- **Server.** New `Review` type, a `review` bus event broadcast to every dashboard, and in-memory storage in the pipeline (dropped on reset and when a flagged message ages out of the 1,000 cap). New protected route `POST /api/review` `{ messageId, verdict: "right" | "wrong" | null, shouldBe? }`, which 404s for messages the model never flagged. Nothing goes to Twitch or to disk.
+- **Not built, by decision:** video clips. Twitch Clips were ruled out because clips are public and would publish the revealing moment (AGENTS.md §2.3). Local OBS replay-buffer clips remain possible later as an opt-in, because §2.7 says no frames go to disk by default.
+- Rule reasons that repeated the category label were reworded (e.g. "Phrased as a guess and names a place").
+- **Tests.** `server/test/review.test.ts` (3 tests): verdict set, replace and clear with bus events; only flagged messages accepted; cleared on reset; the route checks cookie and origin, validates input and returns 404. 196 tests pass. Driven end to end in a browser: opened a row, marked it wrong, picked "Asked where", and the server snapshot and the row tag agreed.

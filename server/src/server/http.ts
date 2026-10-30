@@ -70,6 +70,14 @@ export async function createApp(config: Config, auth = new TwitchAuth(config), c
       if (record && !record.success) return reply.code(502).send({ error: record.error ?? 'Shield Mode change failed.' });
       return record ?? { ok: true };
     });
+    // Mods check the model's calls. Verdicts live in memory for this session only.
+    const categories = ['location_question', 'location_guess', 'location_confirmation', 'location_share', 'approach_intent', 'swat_or_threat', 'benign'] as const;
+    app.post('/api/review', async (req, reply) => {
+      const body = z.object({ messageId: z.string().min(1).max(200), verdict: z.enum(['right', 'wrong']).nullable(), shouldBe: z.enum(categories).optional() }).strict().safeParse(req.body);
+      if (!body.success) return reply.code(400).send({ error: 'Send { messageId, verdict: "right" | "wrong" | null, shouldBe? }.' });
+      if (!pipeline.review(body.data.messageId, body.data.verdict, body.data.shouldBe)) return reply.code(404).send({ error: 'That message is no longer in the flagged list.' });
+      return { ok: true };
+    });
   }
   const simulator = chat?.simulator;
   if (simulator) {

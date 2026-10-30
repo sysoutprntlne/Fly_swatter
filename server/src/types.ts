@@ -88,4 +88,7 @@ export interface ActionRecord {
 }
 export interface AiStatus { enabled: boolean; healthy: boolean; budgetReached: boolean; message: string }
 export interface Settings { swatAllGuesses: boolean }
-export interface PipelineSnapshot { settings: Settings; mode: Mode; risk: RiskState; flagged: Flagged[]; clusters: PlaceCluster[]; actions: ActionRecord[]; ai: AiStatus }
+// A mod's check of one call the model made: right, or wrong and what it should have been. Session memory only.
+export type Verdict = 'right' | 'wrong';
+export interface Review { messageId: string; verdict: Verdict; shouldBe?: Category; at: number }
+export interface PipelineSnapshot { settings: Settings; mode: Mode; risk: RiskState; flagged: Flagged[]; clusters: PlaceCluster[]; actions: ActionRecord[]; ai: AiStatus; reviews: Review[] }

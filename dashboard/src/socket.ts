@@ -1,5 +1,5 @@
-import type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, RiskLevel, RiskState, Settings } from '../../server/src/types';
-export type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, RiskLevel, RiskState, Settings };
+import type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, Review, RiskLevel, RiskState, Settings } from '../../server/src/types';
+export type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, Review, RiskLevel, RiskState, Settings };
 export interface DashboardHandlers {
   onSnapshot: (snapshot: ChatSnapshot) => void;
   onMessage: (message: ChatMessage) => void;
@@ -17,6 +17,7 @@ export interface DashboardHandlers {
   onSettings: (settings: Settings) => void;
   onAiStatus: (status: AiStatus) => void;
   onPipelineReset: (snapshot: PipelineSnapshot) => void;
+  onReview: (change: { messageId: string; review: Review | null }) => void;
 }
 export function connectDashboard(handlers: DashboardHandlers) {
   let socket: WebSocket;
@@ -47,6 +48,7 @@ export function connectDashboard(handlers: DashboardHandlers) {
         else if (message.type === 'settings') handlers.onSettings(message.payload as Settings);
         else if (message.type === 'ai.status') handlers.onAiStatus(message.payload as AiStatus);
         else if (message.type === 'pipeline.reset') handlers.onPipelineReset(message.payload as PipelineSnapshot);
+        else if (message.type === 'review') handlers.onReview(message.payload as { messageId: string; review: Review | null });
       } catch { /* Ignore malformed frames; the next snapshot restores state. */ }
     };
     socket.onclose = () => {
