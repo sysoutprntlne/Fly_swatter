@@ -1,0 +1,32 @@
+{
+  "name": "fly-swatter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "server",
+    "dashboard"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspace server",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "npm run eval --workspace server",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.18.0",
+    "eslint": "^9.39.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^5.0.5"
+  }
+}

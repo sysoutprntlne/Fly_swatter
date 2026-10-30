@@ -1,0 +1,175 @@
+[
+ {
+  "id": "hold-001",
+  "label": "benign",
+  "text": "bro the lighting in this city at night is unreal"
+ },
+ {
+  "id": "hold-002",
+  "label": "benign",
+  "text": "my cousin lives near a mall like that lol"
+ },
+ {
+  "id": "hold-003",
+  "label": "benign",
+  "text": "is that a new jacket?"
+ },
+ {
+  "id": "hold-004",
+  "label": "benign",
+  "text": "that bridge in Cyberpunk is way bigger"
+ },
+ {
+  "id": "hold-005",
+  "label": "benign",
+  "text": "lol the sign says no parking"
+ },
+ {
+  "id": "hold-006",
+  "label": "benign",
+  "text": "i need to go to target after work"
+ },
+ {
+  "id": "hold-007",
+  "label": "benign",
+  "text": "anyone know a good pizza place? asking for me lol"
+ },
+ {
+  "id": "hold-008",
+  "label": "benign",
+  "text": "what game are you playing later"
+ },
+ {
+  "id": "hold-009",
+  "label": "benign",
+  "text": "I'm from Gullhaven too!! small world"
+ },
+ {
+  "id": "hold-010",
+  "label": "benign",
+  "text": "that looks like my old street haha"
+ },
+ {
+  "id": "hold-011",
+  "label": "benign",
+  "text": "chat where are the mods tonight"
+ },
+ {
+  "id": "hold-012",
+  "label": "benign",
+  "text": "is this the same camera as last week?"
+ },
+ {
+  "id": "hold-013",
+  "label": "location_question",
+  "text": "yo whats the name of this street"
+ },
+ {
+  "id": "hold-014",
+  "label": "location_question",
+  "text": "which town u in"
+ },
+ {
+  "id": "hold-015",
+  "label": "location_question",
+  "text": "where's this at??"
+ },
+ {
+  "id": "hold-016",
+  "label": "location_question",
+  "text": "what city r u in today"
+ },
+ {
+  "id": "hold-017",
+  "label": "location_question",
+  "text": "what store is that behind you"
+ },
+ {
+  "id": "hold-018",
+  "label": "location_guess",
+  "text": "isnt that Pemberton Avenue"
+ },
+ {
+  "id": "hold-019",
+  "label": "location_guess",
+  "text": "bet you're at the Coldwater mall"
+ },
+ {
+  "id": "hold-020",
+  "label": "location_guess",
+  "text": "thats gotta be Wrenfield Station"
+ },
+ {
+  "id": "hold-021",
+  "label": "location_guess",
+  "text": "are u in Lark Hollow right now"
+ },
+ {
+  "id": "hold-022",
+  "label": "location_guess",
+  "text": "is that the Walgreens on Ashby Rd?"
+ },
+ {
+  "id": "hold-023",
+  "label": "location_confirmation",
+  "text": "yup that's Ashby Rd for sure",
+  "context": [
+   {
+    "user": "x",
+    "text": "is that the Walgreens on Ashby Rd?"
+   }
+  ]
+ },
+ {
+  "id": "hold-024",
+  "label": "location_confirmation",
+  "text": "correct, that's Pemberton",
+  "context": [
+   {
+    "user": "y",
+    "text": "isnt that Pemberton Avenue"
+   }
+  ]
+ },
+ {
+  "id": "hold-025",
+  "label": "location_confirmation",
+  "text": "yeah it's Wrenfield Station",
+  "context": [
+   {
+    "user": "z",
+    "text": "thats gotta be Wrenfield Station"
+   }
+  ]
+ },
+ {
+  "id": "hold-026",
+  "label": "location_share",
+  "text": "88 Pemberton Ave, the blue building"
+ },
+ {
+  "id": "hold-027",
+  "label": "location_share",
+  "text": "maps.google.com/?q=fake"
+ },
+ {
+  "id": "hold-028",
+  "label": "approach_intent",
+  "text": "heading there now, see you soon"
+ },
+ {
+  "id": "hold-029",
+  "label": "approach_intent",
+  "text": "i'm nearby, gonna come say hi"
+ },
+ {
+  "id": "hold-030",
+  "label": "swat_or_threat",
+  "text": "you better watch out, I know where you live"
+ },
+ {
+  "id": "hold-031",
+  "label": "swat_or_threat",
+  "text": "someone should swat this guy"
+ }
+]

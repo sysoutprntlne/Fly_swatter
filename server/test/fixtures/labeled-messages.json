@@ -1,0 +1,462 @@
+[
+ {
+  "label": "benign",
+  "text": "hi from Texas!! first time here",
+  "id": "eval-001"
+ },
+ {
+  "label": "benign",
+  "text": "Elden Ring's Limgrave is huge",
+  "id": "eval-002"
+ },
+ {
+  "label": "benign",
+  "text": "Starbucks is overrated tbh",
+  "id": "eval-003"
+ },
+ {
+  "label": "benign",
+  "text": "see you at TwitchCon!",
+  "id": "eval-004"
+ },
+ {
+  "label": "benign",
+  "text": "I'm watching from Brazil, 2am here",
+  "id": "eval-005"
+ },
+ {
+  "label": "benign",
+  "text": "the main street in that GTA map is so detailed",
+  "id": "eval-006"
+ },
+ {
+  "label": "benign",
+  "text": "I love the CVS near my house, best snacks",
+  "id": "eval-007"
+ },
+ {
+  "label": "benign",
+  "text": "went to a national park last summer",
+  "id": "eval-008"
+ },
+ {
+  "label": "benign",
+  "text": "Leyndell is the best city in any game",
+  "id": "eval-009"
+ },
+ {
+  "label": "benign",
+  "text": "it's raining where I am",
+  "id": "eval-010"
+ },
+ {
+  "label": "benign",
+  "text": "my mom works at a Walmart lol",
+  "id": "eval-011"
+ },
+ {
+  "label": "benign",
+  "text": "Hyrule Castle Town music slaps",
+  "id": "eval-012"
+ },
+ {
+  "label": "benign",
+  "text": "I live in Ohio and it's freezing",
+  "id": "eval-013"
+ },
+ {
+  "label": "benign",
+  "text": "anyone else here from Canada?",
+  "id": "eval-014"
+ },
+ {
+  "label": "benign",
+  "text": "the Mushroom Kingdom is my home",
+  "id": "eval-015"
+ },
+ {
+  "label": "benign",
+  "text": "road trip vibes, love these streams",
+  "id": "eval-016"
+ },
+ {
+  "label": "benign",
+  "text": "which city has the best tacos, chat? fight me",
+  "id": "eval-017"
+ },
+ {
+  "label": "benign",
+  "text": "I took the train to work today, so tired",
+  "id": "eval-018"
+ },
+ {
+  "label": "benign",
+  "text": "Gotham looks like that street in the movie",
+  "id": "eval-019"
+ },
+ {
+  "label": "benign",
+  "text": "costco hot dogs are elite",
+  "id": "eval-020"
+ },
+ {
+  "label": "benign",
+  "text": "my street has the same trees",
+  "id": "eval-021"
+ },
+ {
+  "label": "benign",
+  "text": "the park in Animal Crossing is better",
+  "id": "eval-022"
+ },
+ {
+  "label": "benign",
+  "text": "I'm going to TwitchCon in the fall, hope to see you there",
+  "id": "eval-023"
+ },
+ {
+  "label": "benign",
+  "text": "Paris is on my bucket list",
+  "id": "eval-024"
+ },
+ {
+  "label": "benign",
+  "text": "GG that was a crazy walk",
+  "id": "eval-025"
+ },
+ {
+  "label": "location_question",
+  "text": "what city is that??",
+  "id": "eval-026"
+ },
+ {
+  "label": "location_question",
+  "text": "where r u rn",
+  "id": "eval-027"
+ },
+ {
+  "label": "location_question",
+  "text": "which street is this?",
+  "id": "eval-028"
+ },
+ {
+  "label": "location_question",
+  "text": "where are you streaming from today",
+  "id": "eval-029"
+ },
+ {
+  "label": "location_question",
+  "text": "what part of town is that",
+  "id": "eval-030"
+ },
+ {
+  "label": "location_question",
+  "text": "what mall is this",
+  "id": "eval-031"
+ },
+ {
+  "label": "location_question",
+  "text": "where is this place",
+  "id": "eval-032"
+ },
+ {
+  "label": "location_question",
+  "text": "what neighborhood are you in",
+  "id": "eval-033"
+ },
+ {
+  "label": "location_question",
+  "text": "which park is that",
+  "id": "eval-034"
+ },
+ {
+  "label": "location_question",
+  "text": "where u at",
+  "id": "eval-035"
+ },
+ {
+  "label": "location_question",
+  "text": "is that downtown? where exactly",
+  "id": "eval-036"
+ },
+ {
+  "label": "location_question",
+  "text": "what state are you in rn",
+  "id": "eval-037"
+ },
+ {
+  "label": "location_question",
+  "text": "which station is that",
+  "id": "eval-038"
+ },
+ {
+  "label": "location_question",
+  "text": "where is this, it looks familiar",
+  "id": "eval-039"
+ },
+ {
+  "label": "location_question",
+  "text": "what area is this, chat?",
+  "id": "eval-040"
+ },
+ {
+  "label": "location_guess",
+  "text": "is that the CVS on Maple Ave?",
+  "id": "eval-041"
+ },
+ {
+  "label": "location_guess",
+  "text": "I think that's Maple Avenue by the old bakery",
+  "id": "eval-042"
+ },
+ {
+  "label": "location_guess",
+  "text": "are you near Brightwater Mall?",
+  "id": "eval-043"
+ },
+ {
+  "label": "location_guess",
+  "text": "looks like Gullhaven Pier to me",
+  "id": "eval-044"
+ },
+ {
+  "label": "location_guess",
+  "text": "is this the Tamberly Plaza",
+  "id": "eval-045"
+ },
+ {
+  "label": "location_guess",
+  "text": "that's the corner of Oak and Fennick",
+  "id": "eval-046"
+ },
+ {
+  "label": "location_guess",
+  "text": "is that the Starbucks on Larkspur Road",
+  "id": "eval-047"
+ },
+ {
+  "label": "location_guess",
+  "text": "are you at Quillon Park right now",
+  "id": "eval-048"
+ },
+ {
+  "label": "location_guess",
+  "text": "i think you're on Harrow Street",
+  "id": "eval-049"
+ },
+ {
+  "label": "location_guess",
+  "text": "is that Brightwater Mall's north entrance?",
+  "id": "eval-050"
+ },
+ {
+  "label": "location_guess",
+  "text": "looks like the Fennick Station platform",
+  "id": "eval-051"
+ },
+ {
+  "label": "location_guess",
+  "text": "that has to be Dunmore Bridge",
+  "id": "eval-052"
+ },
+ {
+  "label": "location_guess",
+  "text": "are you by the Wexley campus",
+  "id": "eval-053"
+ },
+ {
+  "label": "location_guess",
+  "text": "is that the 7-Eleven on Corran Blvd",
+  "id": "eval-054"
+ },
+ {
+  "label": "location_guess",
+  "text": "pretty sure that's Lindell Square",
+  "id": "eval-055"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yeah thats maple ave 100%",
+  "context": [
+   {
+    "user": "sniffer22",
+    "text": "is that the CVS on Maple Ave?"
+   }
+  ],
+  "id": "eval-056"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yeah brightwater mall confirmed",
+  "context": [
+   {
+    "user": "a1",
+    "text": "are you near Brightwater Mall?"
+   }
+  ],
+  "id": "eval-057"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yep that's it, I know that place",
+  "context": [
+   {
+    "user": "a2",
+    "text": "is that the Tamberly Plaza"
+   }
+  ],
+  "id": "eval-058"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "100% that's Harrow Street",
+  "context": [
+   {
+    "user": "a3",
+    "text": "i think you're on Harrow Street"
+   }
+  ],
+  "id": "eval-059"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "confirmed, I live by there",
+  "context": [
+   {
+    "user": "a4",
+    "text": "looks like Gullhaven Pier to me"
+   }
+  ],
+  "id": "eval-060"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yeah thats right by the Fennick Station",
+  "context": [
+   {
+    "user": "a5",
+    "text": "is that Fennick Station?"
+   }
+  ],
+  "id": "eval-061"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yes!! that's Quillon Park",
+  "context": [
+   {
+    "user": "a6",
+    "text": "are you at Quillon Park right now"
+   }
+  ],
+  "id": "eval-062"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yeah its Larkspur Road for sure",
+  "context": [
+   {
+    "user": "a7",
+    "text": "is that the Starbucks on Larkspur Road"
+   }
+  ],
+  "id": "eval-063"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "i know that place, it's Dunmore Bridge",
+  "context": [
+   {
+    "user": "a8",
+    "text": "that has to be Dunmore Bridge"
+   }
+  ],
+  "id": "eval-064"
+ },
+ {
+  "label": "location_confirmation",
+  "text": "yeah that's it",
+  "context": [
+   {
+    "user": "a9",
+    "text": "is that the 7-Eleven on Corran Blvd"
+   }
+  ],
+  "id": "eval-065"
+ },
+ {
+  "label": "location_share",
+  "text": "17 Gullhaven Rd near the mall right?",
+  "id": "eval-066"
+ },
+ {
+  "label": "location_share",
+  "text": "they're at 42.3611, -71.0570",
+  "id": "eval-067"
+ },
+ {
+  "label": "location_share",
+  "text": "maps.app.goo.gl/fakeFlyLink",
+  "id": "eval-068"
+ },
+ {
+  "label": "location_share",
+  "text": "2210 Larkspur Road, apt 4",
+  "id": "eval-069"
+ },
+ {
+  "label": "location_share",
+  "text": "go north on Maple Ave, second left, red door",
+  "id": "eval-070"
+ },
+ {
+  "label": "approach_intent",
+  "text": "omw to maple ave",
+  "id": "eval-071"
+ },
+ {
+  "label": "approach_intent",
+  "text": "im like 10 min away lol",
+  "id": "eval-072"
+ },
+ {
+  "label": "approach_intent",
+  "text": "i'm outside, turn around",
+  "id": "eval-073"
+ },
+ {
+  "label": "approach_intent",
+  "text": "pulling up to brightwater mall rn",
+  "id": "eval-074"
+ },
+ {
+  "label": "approach_intent",
+  "text": "wave at me, I see you",
+  "id": "eval-075"
+ },
+ {
+  "label": "swat_or_threat",
+  "text": "someone call 911 on them lol swat time",
+  "id": "eval-076"
+ },
+ {
+  "label": "swat_or_threat",
+  "text": "I know where you live",
+  "id": "eval-077"
+ },
+ {
+  "label": "swat_or_threat",
+  "text": "I'll find you after stream",
+  "id": "eval-078"
+ },
+ {
+  "label": "swat_or_threat",
+  "text": "calling the cops on you rn",
+  "id": "eval-079"
+ },
+ {
+  "label": "swat_or_threat",
+  "text": "gonna get you swatted tonight",
+  "id": "eval-080"
+ }
+]

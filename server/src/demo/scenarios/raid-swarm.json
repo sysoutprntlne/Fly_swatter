@@ -1,0 +1,17 @@
+{
+  "name": "Raid swarm",
+  "speed": 1.0,
+  "events": [
+    { "t": 0,     "type": "chat", "user": "regular_rae", "text": "the sunset is unreal" },
+    { "t": 2000,  "type": "raid", "fromUser": "chaoschannel", "viewers": 420 },
+    { "t": 3000,  "type": "chat", "user": "raidpal_01", "text": "RAID HYPE", "accountAgeDays": 200 },
+    { "t": 4000,  "type": "chat", "user": "fresh_snoop1", "text": "where are you? what mall is this", "accountAgeDays": 0 },
+    { "t": 5000,  "type": "chat", "user": "fresh_snoop2", "text": "that's Brightwater Mall, I see the fountain", "accountAgeDays": 1 },
+    { "t": 6000,  "type": "chat", "user": "fresh_snoop3", "text": "yeah brightwater mall confirmed", "accountAgeDays": 0 },
+    { "t": 7000,  "type": "chat", "user": "raidpal_02", "text": "hi streamer!!", "accountAgeDays": 400 },
+    { "t": 8000,  "type": "chat", "user": "fresh_snoop4", "text": "brightwater mall, north entrance. pulling up", "accountAgeDays": 0 },
+    { "t": 9500,  "type": "chat", "user": "fresh_snoop5", "text": "someone call 911 on them lol swat time", "accountAgeDays": 0 },
+    { "t": 11000, "type": "chat", "user": "fresh_snoop1", "text": "17 Gullhaven Rd near the mall right?", "accountAgeDays": 0 },
+    { "t": 12500, "type": "chat", "user": "regular_rae", "text": "mods??" }
+  ]
+}

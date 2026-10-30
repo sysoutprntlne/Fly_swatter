@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.tokens.json
+.tokens.json.*
+reports/
+dist/
+coverage/
+*.log
+.DS_Store
+.taste-skill/

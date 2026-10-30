@@ -1,0 +1,17 @@
+{
+  "name": "False positive check",
+  "speed": 1.0,
+  "events": [
+    { "t": 0,     "type": "chat", "user": "texan_tina", "text": "hi from Texas!! first time catching a stream live" },
+    { "t": 2000,  "type": "chat", "user": "souls_fan", "text": "Elden Ring's Limgrave is huge, took me 40 hours" },
+    { "t": 4000,  "type": "chat", "user": "coffee_critic", "text": "Starbucks is overrated tbh" },
+    { "t": 6000,  "type": "chat", "user": "con_goer", "text": "see you at TwitchCon!" },
+    { "t": 8000,  "type": "chat", "user": "brazil_bia", "text": "I'm watching from Brazil, it's 2am here lol" },
+    { "t": 10000, "type": "chat", "user": "gamer_gus", "text": "the main street in that GTA map is so detailed" },
+    { "t": 12000, "type": "chat", "user": "foodie_fay", "text": "I love the CVS near my house, they have the best snacks" },
+    { "t": 14000, "type": "chat", "user": "hiker_hal", "text": "went to a national park last summer, highly recommend" },
+    { "t": 16000, "type": "chat", "user": "texan_tina", "text": "which city has the best tacos, chat? fight me" },
+    { "t": 18000, "type": "chat", "user": "souls_fan", "text": "Leyndell is the best city in any game" },
+    { "t": 20000, "type": "chat", "user": "weather_wes", "text": "it's raining where I am, jealous of your sun" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "IRL triangulation",
+  "speed": 1.0,
+  "events": [
+    { "t": 0,     "type": "chat", "user": "cozyviewer", "text": "this walk is so chill" },
+    { "t": 2500,  "type": "chat", "user": "lurker_99", "text": "what city is that??" },
+    { "t": 4500,  "type": "chat", "user": "teacup_tom", "text": "love the vibes today" },
+    { "t": 6000,  "type": "chat", "user": "sniffer22", "text": "is that the CVS on Maple Ave?" },
+    { "t": 8000,  "type": "chat", "user": "nosy_ned", "text": "where r u rn" },
+    { "t": 9000,  "type": "chat", "user": "brandnew_acc", "text": "yeah thats maple ave 100%", "accountAgeDays": 1 },
+    { "t": 11000, "type": "chat", "user": "mapwatcher", "text": "I think that's Maple Avenue by the old bakery", "accountAgeDays": 3 },
+    { "t": 12000, "type": "chat", "user": "sniffer22", "text": "im like 10 min away lol" },
+    { "t": 13500, "type": "chat", "user": "streetsleuth", "text": "maple ave and 4th, i know that place", "accountAgeDays": 2 },
+    { "t": 15000, "type": "chat", "user": "cozyviewer", "text": "guys stop that's weird" },
+    { "t": 16500, "type": "chat", "user": "mod_mellow", "text": "please don't guess the streamer's location, chat", "role": "moderator" },
+    { "t": 18000, "type": "raid", "fromUser": "randomraider", "viewers": 150 },
+    { "t": 19500, "type": "chat", "user": "raider_fresh1", "text": "which street is this?", "accountAgeDays": 0 },
+    { "t": 21000, "type": "chat", "user": "raider_fresh2", "text": "omw to maple ave", "accountAgeDays": 0 },
+    { "t": 23000, "type": "chat", "user": "teacup_tom", "text": "that dog is so cute" }
+  ]
+}
