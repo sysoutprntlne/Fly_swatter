@@ -13,14 +13,14 @@ export function ModeSwitch({ mode, onError }: { mode: Mode; onError: (message: s
 /** Settings, shown on request: what the mode does, the swat-all switch, and the connections behind it. */
 export function ResponsePanel({ mode, settings, ai, moderationAuthorized, demo, loginUrl, warnings, onError }: { mode: Mode; settings: Settings; ai?: AiStatus; moderationAuthorized: boolean; demo: boolean; loginUrl?: string; warnings: string[]; onError: (message: string) => void }) {
   return <div className="settings">
-    <p><span className="who">{modeInfo[mode].name}.</span> {modeInfo[mode].detail}{demo ? ' In demo, every action is a dry run.' : ''}</p>
+    <p><span className="who">{modeInfo[mode].name}.</span> {modeInfo[mode].detail}{demo ? ' In practice mode nothing is really deleted.' : ''}</p>
     <label className="switch-row"><input type="checkbox" role="switch" checked={settings.swatAllGuesses} onChange={e => { onError(''); post('/api/settings', { swatAllGuesses: e.target.checked }).catch((err: Error) => onError(err.message)); }} />
-      <span><span className="who">Swat all guesses</span><span className="muted">Delete every guess, so deletions never hint which one chat agrees on. More false deletions.</span></span></label>
+      <span><span className="who">Delete every guess</span><span className="muted">Deletes all guesses, even single ones, so viewers can't tell which guess was right from what gets deleted. Some harmless messages may go too.</span></span></label>
     <dl className="kv">
-      <div><dt>Classifier</dt><dd>{ai?.message ?? '–'}</dd></div>
-      <div><dt>Moderation</dt><dd>{demo ? 'Not needed in demo' : moderationAuthorized ? 'Granted' : 'Missing'}</dd></div>
-      {warnings.map(w => <div key={w}><dt>Note</dt><dd>{w}</dd></div>)}
+      <div><dt>Detection</dt><dd>{!ai ? '–' : !ai.enabled ? 'Basic word rules (no AI key added)' : ai.budgetReached ? 'AI limit reached for this minute, using basic rules' : ai.healthy ? 'AI' : 'AI unavailable, using basic rules'}</dd></div>
+      <div><dt>Permission to delete</dt><dd>{demo ? 'Not needed for practice' : moderationAuthorized ? 'Given' : 'Not given yet'}</dd></div>
+      {warnings.map(w => <div key={w}><dt>Setup</dt><dd>{w}</dd></div>)}
     </dl>
-    {mode !== 'observe' && !demo && !moderationAuthorized && <p className="alert" role="alert">Without moderation permission, deletions will fail. {loginUrl && <a href={loginUrl}>Reconnect Twitch</a>}</p>}
+    {mode !== 'observe' && !demo && !moderationAuthorized && <p className="alert" role="alert">Fly Swatter can't delete messages until you give it permission. {loginUrl && <a href={loginUrl}>Reconnect Twitch</a>}</p>}
   </div>;
 }

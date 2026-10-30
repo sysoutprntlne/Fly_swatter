@@ -1,9 +1,11 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { RiskState } from '../socket';
+import { strength } from '../plain';
 
 export interface RiskSample { at: number; score: number }
 export const HISTORY_MS = 5 * 60_000;
-const parts: [keyof RiskState['components'], string][] = [['triangulation', 'Triangulation'], ['chat', 'Chat'], ['raid', 'Raid'], ['exposure', 'Exposure']];
+// Each part of the danger score, named for what it watches.
+const parts: [keyof RiskState['components'], string][] = [['triangulation', 'People agreeing on a place'], ['chat', 'Questions and threats'], ['raid', 'Raid, new viewers'], ['exposure', 'What your camera shows']];
 // Gridlines sit on the level boundaries (§10), so the chart's bands are the levels themselves.
 const bands = [{ at: 12.5, name: 'Quiet' }, { at: 37.5, name: 'Few flies' }, { at: 62.5, name: 'Buzzing' }, { at: 87.5, name: 'Swarm' }];
 
@@ -14,11 +16,11 @@ export function RiskDetails({ risk, history, now, exposureConnected }: { risk: R
     <dl className="parts">
       {parts.map(([key, label]) => {
         const off = key === 'exposure' && !exposureConnected;
-        return <div key={key}><dt>{label}</dt><dd className={`track${off ? ' off' : ''}`} aria-hidden="true"><span style={{ width: `${risk.components[key]}%` }} /></dd><dd className="num">{off ? '–' : Math.round(risk.components[key])}</dd></div>;
+        return <div key={key}><dt>{label}</dt><dd className={`track${off ? ' off' : ''}`} aria-hidden="true"><span style={{ width: `${risk.components[key]}%` }} /></dd><dd title={off ? undefined : `${Math.round(risk.components[key])} out of 100`}>{off ? 'Off' : strength(risk.components[key])}</dd></div>;
       })}
     </dl>
-    {risk.questionPressure > 1 && <p className="note">{risk.questionPressure} chatters asked where you are in the last 2 minutes.</p>}
-    {!exposureConnected && <p className="note">Exposure needs OBS, which is not connected.</p>}
+    {risk.questionPressure > 1 && <p className="note">{risk.questionPressure} different people asked where you are in the last 2 minutes.</p>}
+    {!exposureConnected && <p className="note">The camera check needs OBS, which isn't connected.</p>}
   </div>;
 }
 
@@ -44,7 +46,7 @@ function Timeline({ history, now }: { history: RiskSample[]; now: number }) {
       <line x1={left} x2={left + plotW} y1={y(0)} y2={y(0)} stroke="var(--hair-2)" />
       {[0, 50, 100].map(v => <text key={v} x={left - 8} y={y(v) + 4} textAnchor="end">{v}</text>)}
       {bands.map(b => <text key={b.name} x={left + plotW + 12} y={y(b.at) + 4}>{b.name}</text>)}
-      {(plotW < 360 ? [4, 2, 0] : [5, 4, 3, 2, 1, 0]).map(m => <text key={m} x={x(now - m * 60_000)} y={height - 4} textAnchor={m === 5 ? 'start' : m === 0 ? 'end' : 'middle'}>{m ? `−${m}m` : 'now'}</text>)}
+      {(plotW < 520 ? [4, 2, 0] : [5, 4, 3, 2, 1, 0]).map(m => <text key={m} x={x(now - m * 60_000)} y={height - 4} textAnchor={m === 5 ? 'start' : m === 0 ? 'end' : 'middle'}>{m ? `${m} min ago` : 'now'}</text>)}
       {path && <path d={path} fill="none" stroke="var(--level)" strokeWidth="1.2" strokeLinejoin="round" />}
       {last && <circle cx={x(last.at)} cy={y(last.score)} r="2.5" fill="var(--level)" />}
     </svg>}

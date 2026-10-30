@@ -225,3 +225,18 @@ At the user's request:
 - Actions and Settings stay behind disclosure.
 
 `npm run check` passes, taste lint has 0 FAIL, and an IRL-scenario capture was checked; `docs/demo.png` refreshed.
+
+## 2026-10-30 · Plain-language pass for non-expert streamers and mods
+
+The user asked to simplify the statistics and wording, assuming the streamer and mods don't know the jargon. This was a clarify pass, dashboard only. The server keeps its precise wording for logs and reports, and `dashboard/src/plain.ts` translates it.
+
+- **Numbers become words.** Score parts show None / Low / Some / High / Very high, with the 0–100 number on hover. Classifier confidence is Not sure / Fairly sure / Very sure. "score 5.94" is gone from the converging lane. The big score is labelled "Danger score, out of 100".
+- **Terms become everyday phrases:**
+  - Triangulation → "People agreeing on a place"; Exposure → "What your camera shows".
+  - Message kinds: "Asked where", "Guessed a place", "Agreed with a guess", "Says they're coming".
+  - Swat / dry run → Delete / practice; Shield Mode → "Lock down chat" (the tooltip names Shield Mode).
+  - Status line: "Twitch not set up", "Waiting for chat", "Basic detection".
+- **Sentences instead of shorthand.** The finding says "5 people in chat agree on the street you're on. It would have deleted 5 messages, but this is practice mode, so nothing was deleted." The selected mode's meaning shows under the mode switch. The lane has a legend ("Each fly is one person…"). Action reasons and flag reasons are rewritten ("It was a guess about where you are. Reason: several people agreed on the same place.").
+- Mode and level names (Observe / Assist / Guardian, Quiet … Swarm Incoming) are unchanged, so they still match the README and the mod alerts.
+
+`npm run check` passes (193 tests). Taste lint: 0 FAIL. Inspector: 0 FAIL, 2 WARNs as before. Checked with the closed rows open during the IRL scenario.

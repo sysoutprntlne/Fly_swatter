@@ -8,7 +8,8 @@ import { ActionLog } from './components/ActionLog';
 import { ModeSwitch, ResponsePanel } from './components/ModeControls';
 import { LevelMark, Mascot } from './components/Mascot';
 import { SpecimenFly } from './components/SpecimenFly';
-import { levelInfo, time } from './labels';
+import { levelInfo, modeInfo, time } from './labels';
+import { placeKind } from './plain';
 interface Health { ok: boolean; warnings: string[]; mascotName: string; loginUrl: string; swarmMinUsers: number; swarmMinScore: number }
 interface AuthStatus { configured: boolean; connected: boolean; chatAuthorized: boolean; moderationAuthorized: boolean; login?: string; message: string }
 const initialRisk: RiskState = { score: 0, level: 'quiet', components: { chat: 0, triangulation: 0, exposure: 0, raid: 0 }, questionPressure: 0, updatedAt: 0 };
@@ -99,10 +100,10 @@ export default function App() {
   const connectLabel = !auth?.connected ? 'Connect Twitch' : !auth.chatAuthorized ? 'Enable chat reading' : !auth.moderationAuthorized ? 'Enable moderation' : undefined;
   // Connection state as one quiet line of words; only a problem earns a tone.
   const statuses: { label: string; tone: Tone }[] = [
-    ...(demoOn ? [{ label: 'Demo', tone: 'warn' as Tone }] : []),
-    !auth?.configured ? { label: 'Twitch off', tone: '' } : auth.connected ? { label: `@${auth.login}`, tone: '' } : { label: 'Twitch signed out', tone: 'warn' },
-    !socketConnected ? { label: 'Offline', tone: 'bad' } : chatStatus.state === 'connected' ? { label: 'Chat live', tone: '' } : chatStatus.state === 'revoked' ? { label: 'Chat revoked', tone: 'bad' } : chatStatus.state === 'reconnecting' ? { label: 'Reconnecting', tone: 'warn' } : { label: 'Chat waiting', tone: '' },
-    !ai ? { label: 'Classifier', tone: '' } : ai.budgetReached ? { label: 'AI budget reached', tone: 'warn' } : !ai.enabled ? { label: 'Rules only', tone: '' } : ai.healthy ? { label: 'AI', tone: '' } : { label: 'AI fallback', tone: 'warn' },
+    ...(demoOn ? [{ label: 'Practice mode', tone: 'warn' as Tone }] : []),
+    !auth?.configured ? { label: 'Twitch not set up', tone: '' } : auth.connected ? { label: `@${auth.login}`, tone: '' } : { label: 'Twitch signed out', tone: 'warn' },
+    !socketConnected ? { label: 'Lost connection', tone: 'bad' } : chatStatus.state === 'connected' ? { label: 'Reading chat', tone: '' } : chatStatus.state === 'revoked' ? { label: 'Chat access removed', tone: 'bad' } : chatStatus.state === 'reconnecting' ? { label: 'Reconnecting', tone: 'warn' } : { label: 'Waiting for chat', tone: '' },
+    !ai ? { label: 'Starting', tone: '' } : ai.budgetReached ? { label: 'AI limit reached', tone: 'warn' } : !ai.enabled ? { label: 'Basic detection', tone: '' } : ai.healthy ? { label: 'AI detection', tone: '' } : { label: 'AI down, using basic', tone: 'warn' },
   ];
   // Shield Mode state is the last successful shield action (dry runs count in demo, and are labelled).
   const shield = [...actions].reverse().find(a => (a.kind === 'shield_mode_on' || a.kind === 'shield_mode_off') && a.success);
@@ -114,11 +115,13 @@ export default function App() {
   const recent = flagged.filter(f => now - f.message.timestamp <= HISTORY_MS).length;
   const deletes = actions.filter(a => a.kind === 'delete_message');
   const swatted = deletes.filter(a => a.success && !a.dryRun).length, wouldSwat = deletes.filter(a => a.dryRun).length;
-  const what = top?.isSwarm ? `${top.distinctUsers} chatters are converging on one ${top.granularity} guess.`
-    : top && top.distinctUsers >= 2 ? `${top.distinctUsers} chatters named the same ${top.granularity}; a swarm needs ${minUsers}.`
-    : recent ? `${recent} location message${recent === 1 ? '' : 's'} in the last 5 minutes, none converging.`
-    : 'Chat is quiet: nobody has asked where you are in the last 5 minutes.';
-  const did = swatted ? ` ${swatted} message${swatted === 1 ? '' : 's'} swatted this session.` : wouldSwat ? ` ${wouldSwat} would have been swatted this session (dry run).` : '';
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  const what = top?.isSwarm ? `${plural(top.distinctUsers, 'person', 'people')} in chat agree on ${placeKind[top.granularity]}.`
+    : top && top.distinctUsers >= 2 ? `${plural(top.distinctUsers, 'person', 'people')} guessed ${placeKind[top.granularity]}. It turns dangerous at ${minUsers}.`
+    : recent ? `${plural(recent, 'message', 'messages')} asked or guessed where you are in the last 5 minutes. They don't agree on a place.`
+    : 'Nobody has asked where you are in the last 5 minutes.';
+  const did = swatted ? ` Fly Swatter deleted ${plural(swatted, 'message', 'messages')}.`
+    : wouldSwat ? ` It would have deleted ${plural(wouldSwat, 'message', 'messages')}, but this is ${demoOn ? 'practice mode' : 'Observe mode'}, so nothing was deleted.` : '';
 
   const info = levelInfo[risk.level];
   return <div className={`app lv-${risk.level}`}>
@@ -128,7 +131,7 @@ export default function App() {
       <p className="status" aria-label="Connections">{statuses.map(s => <span key={s.label} className={s.tone}>{s.label}</span>)}</p>
       <div className="top-actions">
         {health && auth?.configured && connectLabel && <a className="text-btn" href={health.loginUrl}>{connectLabel}</a>}
-        {demo && <button type="button" className="text-btn" aria-pressed={demoOn} onClick={() => { setControlError(''); post('/api/demo/mode', { enabled: !demoOn }).catch((e: Error) => setControlError(e.message)); }}>{demoOn ? 'End demo' : 'Demo'}</button>}
+        {demo && <button type="button" className="text-btn" aria-pressed={demoOn} onClick={() => { setControlError(''); post('/api/demo/mode', { enabled: !demoOn }).catch((e: Error) => setControlError(e.message)); }}>{demoOn ? 'Leave practice' : 'Practice'}</button>}
       </div>
     </header>
     {demo?.enabled && <DemoControls state={demo} raid={raid} onError={setControlError} />}
@@ -138,22 +141,24 @@ export default function App() {
 
       <section className="readout" aria-labelledby="level-heading">
         <p className="score num" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(risk.score)} aria-valuetext={`${Math.round(risk.score)} out of 100, ${info.name}`}>{Math.round(risk.score)}</p>
+        <p className="score-label">Danger score, out of 100</p>
         <h1 id="level-heading" className="level"><LevelMark level={risk.level} />{info.name}</h1>
         <p className="finding" role="status">{what}{did}</p>
         <div className="actions">
           <ModeSwitch mode={mode} onError={setControlError} />
-          <button type="button" className={`btn${!shieldOn && risk.level === 'swarm' ? ' primary' : ''}`} onClick={toggleShield}>{shieldOn ? `Shield off${shield?.dryRun ? ' (dry run)' : ''}` : 'Shield Mode'}</button>
+          <button type="button" className={`btn${!shieldOn && risk.level === 'swarm' ? ' primary' : ''}`} onClick={toggleShield} title="Turns Twitch Shield Mode on or off. It limits who can chat while it's on.">{shieldOn ? `End lockdown${shield?.dryRun ? ' (practice)' : ''}` : 'Lock down chat'}</button>
         </div>
+        <p className="mode-hint">{modeInfo[mode].detail}</p>
         {(error || controlError) && <p className="alert" role="alert">{error || controlError}</p>}
       </section>
 
       <div className="segments">
         <section className="segment" aria-labelledby="risk-seg">
-          <h2 id="risk-seg" className="label">Risk <span className="muted">· last 5 min</span></h2>
+          <h2 id="risk-seg" className="label">Danger <span className="muted">· last 5 minutes</span></h2>
           <RiskDetails risk={risk} history={history} now={now} exposureConnected={false} />
         </section>
         <section className="segment" aria-labelledby="chat-seg">
-          <h2 id="chat-seg" className="label">{demoOn ? 'Simulated chat' : 'Live chat'} <span className="muted num">{feed.length || ''}</span></h2>
+          <h2 id="chat-seg" className="label">{demoOn ? 'Practice chat' : 'Live chat'} <span className="muted num">{feed.length ? `· ${feed.length} messages` : ''}</span></h2>
           {!feed.length ? <p className="empty">{!socketConnected ? 'Reconnecting to the local server…' : demoOn ? 'Press Play, or type as a viewer.' : auth?.chatAuthorized ? 'Send a message in your channel to test the connection.' : 'Connect Twitch to read chat.'}</p> :
             <ol className="chat" aria-label="Recent chat messages">{feed.slice(-100).reverse().map(message => <li key={message.id}>
               <p><span className="who">{message.userName}{message.isBroadcaster ? ' (you)' : message.isModerator ? ' (mod)' : ''}</span><time className="num" dateTime={new Date(message.timestamp).toISOString()}>{time(message.timestamp)}</time></p>
@@ -166,7 +171,7 @@ export default function App() {
       <FlyFeed flagged={flagged} actions={actions} />
 
       <div className="more">
-        <details><summary>Actions <span className="num">{actions.length || ''}</span><Plus /></summary><ActionLog actions={actions} /></details>
+        <details><summary>What Fly Swatter did <span className="num">{actions.length ? `· ${actions.length}` : ''}</span><Plus /></summary><ActionLog actions={actions} /></details>
         <details><summary>Settings<Plus /></summary><ResponsePanel mode={mode} settings={settings} ai={ai} moderationAuthorized={Boolean(auth?.moderationAuthorized)} demo={demoOn} loginUrl={health?.loginUrl} warnings={health?.warnings ?? []} onError={setControlError} /></details>
       </div>
     </main>

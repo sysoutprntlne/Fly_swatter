@@ -1,14 +1,14 @@
 import type { ActionRecord, Category, Mode, RiskLevel } from './socket';
 // Level names; each level also has its own shape (LevelMark), so colour is never the only signal (AGENTS.md §13.4).
 export const levelInfo: Record<RiskLevel, { name: string; detail: string }> = {
-  quiet: { name: 'Quiet', detail: 'Nobody is hunting for your location.' },
-  few_flies: { name: 'A Few Flies', detail: 'Some chatters are curious about where you are.' },
-  buzzing: { name: 'Buzzing', detail: 'Chat is actively fishing for your location.' },
-  swarm: { name: 'Swarm Incoming', detail: 'Several chatters agree on a place. Act now.' },
+  quiet: { name: 'Quiet', detail: 'Nobody is trying to find you.' },
+  few_flies: { name: 'A Few Flies', detail: 'A few people are curious where you are.' },
+  buzzing: { name: 'Buzzing', detail: 'Chat is trying to work out where you are.' },
+  swarm: { name: 'Swarm Incoming', detail: 'Several people agree on where you are. Act now.' },
 };
 export const categoryLabel: Record<Category, string> = {
-  location_question: 'Question', location_guess: 'Guess', location_confirmation: 'Confirmation', location_share: 'Shared location',
-  approach_intent: 'Approaching', swat_or_threat: 'Threat', benign: 'Benign',
+  location_question: 'Asked where', location_guess: 'Guessed a place', location_confirmation: 'Agreed with a guess', location_share: 'Shared a location',
+  approach_intent: "Says they're coming", swat_or_threat: 'Threat', benign: 'Harmless',
 };
 // Pill tone per category: shares and threats need a decision now, guesses build a swarm, questions are context.
 export const categoryTone: Record<Category, '' | 'warning' | 'negative'> = {
@@ -16,12 +16,12 @@ export const categoryTone: Record<Category, '' | 'warning' | 'negative'> = {
   approach_intent: 'warning', swat_or_threat: 'negative', benign: '',
 };
 export const modeInfo: Record<Mode, { name: string; detail: string }> = {
-  observe: { name: 'Observe', detail: 'Watches and logs what it would do. Never touches Twitch.' },
-  assist: { name: 'Assist', detail: 'Deletes shared locations, confident guesses and swarm messages; alerts mods in chat.' },
-  guardian: { name: 'Guardian', detail: 'Assist, plus deletes location questions while buzzing, warns repeat offenders and turns on Shield Mode at Swarm.' },
+  observe: { name: 'Observe', detail: 'Only watches. Nothing gets deleted.' },
+  assist: { name: 'Assist', detail: 'Deletes messages that give away where you are, and warns your mods.' },
+  guardian: { name: 'Guardian', detail: 'Like Assist, plus deletes "where are you" questions when chat gets busy, warns repeat guessers, and locks down chat at Swarm.' },
 };
 export const actionLabel: Record<ActionRecord['kind'], string> = {
-  delete_message: 'Swatted message', mod_alert: 'Mod alert', warn_user: 'Warned user', shield_mode_on: 'Shield Mode on', shield_mode_off: 'Shield Mode off',
-  obs_brb_scene: 'BRB scene', report_prepared: 'Report prepared', private_alert: 'Private alert',
+  delete_message: 'Deleted a message', mod_alert: 'Warned your mods', warn_user: 'Warned a chatter', shield_mode_on: 'Locked down chat', shield_mode_off: 'Ended chat lockdown',
+  obs_brb_scene: 'Switched to BRB scene', report_prepared: 'Report prepared', private_alert: 'Note for you',
 };
-export const time = (at: number) => new Date(at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+export const time = (at: number) => new Date(at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });

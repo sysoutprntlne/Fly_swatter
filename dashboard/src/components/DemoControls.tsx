@@ -37,7 +37,7 @@ export function DemoControls({ state, raid, onError }: { state: DemoState; raid?
       ? <button type="button" className="btn" onClick={() => run('/api/demo/pause', {})}>Pause</button>
       : <button type="button" className="btn" disabled={!selected} onClick={() => run('/api/demo/play', { name: selected, speed })}>{resuming ? 'Resume' : 'Play'}</button>}
     <button type="button" className="btn" onClick={() => run('/api/demo/reset', {})}>Reset</button>
-    <span className="demo-progress num" role="status">{state.scenario ? `${state.finished ? 'Finished' : state.playing ? 'Playing' : 'Paused'}, ${state.position} of ${state.total} events` : 'No scenario started'}{raid ? ` · raid, ${raid.viewers} viewers` : ''}</span>
+    <span className="demo-progress num" role="status">{state.scenario ? `${state.finished ? 'Finished' : state.playing ? 'Playing' : 'Paused'}: ${state.position} of ${state.total} steps` : 'Pick a practice scenario'}{raid ? ` · a raid brought ${raid.viewers} viewers` : ''}</span>
     <form onSubmit={inject}>
       <input className="field name" aria-label="Viewer name" value={user} onChange={e => setUser(e.target.value)} maxLength={25} pattern="[A-Za-z0-9_]{1,25}" required />
       <input className="field text" aria-label="Type as a viewer" value={text} onChange={e => setText(e.target.value)} maxLength={500} placeholder="Type as a viewer" />

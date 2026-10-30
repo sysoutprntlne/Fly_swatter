@@ -8,7 +8,7 @@ export function SwarmView({ clusters, actions, minUsers }: { clusters: PlaceClus
   const deletes = new Map(actions.filter(a => a.kind === 'delete_message' && a.targetMessageId).map(a => [a.targetMessageId!, a]));
   const sorted = [...clusters].sort((a, b) => b.score - a.score).slice(0, 3);
   return <section className="swarm" aria-labelledby="swarm-heading">
-    <h2 id="swarm-heading" className="label">Converging</h2>
+    <h2 id="swarm-heading" className="label">People guessing the same place</h2>
     <ul className="clusters">{sorted.map(c => {
       const users = [...new Map(c.mentions.map(m => [m.userId, m])).values()];
       const flies = users.map(u => {
@@ -16,19 +16,20 @@ export function SwarmView({ clusters, actions, minUsers }: { clusters: PlaceClus
         return { id: u.userId, login: u.userLogin, state: own.some(a => a.success && !a.dryRun) ? 'swatted' : own.some(a => a.dryRun) ? 'would' : 'live' } as const;
       });
       return <li key={c.id} className={`cluster${c.isSwarm ? ' is-swarm' : ''}`}>
-        <p className="cluster-head"><span className="place">{c.canonical}</span>{c.isSwarm && <span className="pill negative">Swarm</span>}
-          <span className="meta num">{c.distinctUsers} chatter{c.distinctUsers === 1 ? '' : 's'} · score {c.score.toFixed(2)} · since {time(c.firstSeen)}</span></p>
+        <p className="cluster-head"><span className="place">{c.canonical}</span>{c.isSwarm && <span className="pill negative">Danger</span>}
+          <span className="meta num">{c.distinctUsers} {c.distinctUsers === 1 ? 'person' : 'people'} · since {time(c.firstSeen)}</span></p>
         <Lane flies={flies} minUsers={minUsers} />
       </li>;
     })}</ul>
+    <p className="lane-note">Each fly is one person. The line marks danger: {minUsers} or more people agreeing.</p>
   </section>;
 }
 
 function Lane({ flies, minUsers }: { flies: { id: string; login: string; state: 'live' | 'would' | 'swatted' }[]; minUsers: number }) {
   const shown = flies.slice(0, MAX_FLIES);
   const slots = Math.min(MAX_FLIES, Math.max(minUsers + 1, shown.length));
-  const label = (state: string) => state === 'swatted' ? 'swatted' : state === 'would' ? 'would be swatted (dry run)' : 'still in chat';
-  return <div className="lane" role="img" aria-label={`${flies.length} chatters, swarm at ${minUsers}: ${flies.map(f => `${f.login} ${label(f.state)}`).join(', ')}`}>
+  const label = (state: string) => state === 'swatted' ? 'message deleted' : state === 'would' ? 'would be deleted (practice)' : 'message still in chat';
+  return <div className="lane" role="img" aria-label={`${flies.length} people, danger at ${minUsers}: ${flies.map(f => `${f.login} ${label(f.state)}`).join(', ')}`}>
     {Array.from({ length: slots }, (_, i) => {
       const fly = shown[i];
       return <span key={fly?.id ?? `slot-${i}`} style={{ display: 'contents' }}>
