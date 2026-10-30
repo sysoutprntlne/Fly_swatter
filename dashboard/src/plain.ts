@@ -57,11 +57,11 @@ const rationale: [RegExp, string][] = [
   [/^Rules: /, ''],
   [/address, coordinates, directions or map link pattern/, 'looks like an address, map link or directions'],
   [/threat or swatting phrase/, 'sounds like a threat or a fake police call'],
-  [/says they are coming or nearby/, 'says they are coming or nearby'],
+  [/says they are coming or nearby/, 'talks about coming to you or being close'],
   [/confirms a location/, 'agrees with a place someone named'],
   [/agrees with a named place/, 'agrees with a place someone named'],
-  [/guess phrasing with a place/, 'guesses a place'],
-  [/asks where the streamer is/, 'asks where you are'],
+  [/guess phrasing with a place/, 'phrased as a guess and names a place'],
+  [/asks where the streamer is/, 'a question about your location, with no place named'],
   [/asks if the streamer is somewhere unrecognised/, 'asks if you are somewhere'],
   [/names a specific place/, 'names a specific place'],
 ];
@@ -73,3 +73,19 @@ export function plainRationale(text: string): string {
   out = out.replace(/\.$/, '');
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
+
+/** The prefilter's rule ids, as what a mod would notice in the message. */
+export const ruleLabel: Record<string, string> = {
+  address_or_coordinates: 'Looks like an address, map link or coordinates',
+  approach_intent: 'Says they are coming or nearby',
+  chain_name: 'Names a chain store or restaurant',
+  confirmation_phrasing: 'Agrees with something ("yeah that\'s it")',
+  confirmation_weak: 'Sounds like agreement',
+  guess_phrasing: 'Phrased as a guess ("is that…")',
+  guess_phrasing_weak: 'Sounds like a guess',
+  location_question: 'Asks where you are',
+  place_noun: 'Uses a place word (street, mall, station…)',
+  proper_noun: 'Names something with capital letters',
+  state_zip: 'Mentions a state or postcode',
+  threat: 'Threat or fake-police-call wording',
+};

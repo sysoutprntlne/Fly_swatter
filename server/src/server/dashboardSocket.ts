@@ -25,7 +25,8 @@ export function attachDashboardSocket(server: Server, bus: Bus, snapshot: () => 
     bus.on('classification', flagged => { if (flagged.classification.category !== 'benign') broadcast('classification', flagged); }),
     bus.on('cluster.updated', clusters => broadcast('cluster.updated', clusters)), bus.on('risk.updated', risk => broadcast('risk.updated', risk)),
     bus.on('action.taken', record => broadcast('action.taken', record)), bus.on('mode', mode => broadcast('mode', mode)), bus.on('settings', settings => broadcast('settings', settings)),
-    bus.on('ai.status', status => broadcast('ai.status', status)), bus.on('pipeline.reset', snapshot => broadcast('pipeline.reset', snapshot))];
+    bus.on('ai.status', status => broadcast('ai.status', status)), bus.on('pipeline.reset', snapshot => broadcast('pipeline.reset', snapshot)),
+    bus.on('review', review => broadcast('review', review))];
   const heartbeat = setInterval(() => broadcast('heartbeat', null), 15_000); heartbeat.unref();
   return async () => {
     clearInterval(heartbeat); for (const unsubscribe of unsubscribers) unsubscribe();

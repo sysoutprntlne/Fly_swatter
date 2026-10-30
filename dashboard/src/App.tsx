@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { connectDashboard, post, type ActionRecord, type AiStatus, type ChatMessage, type ChatStatus, type DemoState, type Flagged, type Mode, type PipelineSnapshot, type PlaceCluster, type RaidEvent, type RiskState, type Settings } from './socket';
+import { connectDashboard, post, type ActionRecord, type AiStatus, type ChatMessage, type ChatStatus, type DemoState, type Flagged, type Mode, type PipelineSnapshot, type PlaceCluster, type RaidEvent, type Review, type RiskState, type Settings } from './socket';
 import { DemoControls } from './components/DemoControls';
 import { HISTORY_MS, RiskDetails, type RiskSample } from './components/RiskMeter';
 import { FlyFeed } from './components/FlyFeed';
@@ -31,6 +31,7 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('observe');
   const [settings, setSettings] = useState<Settings>({ swatAllGuesses: false });
   const [ai, setAi] = useState<AiStatus>();
+  const [reviews, setReviews] = useState<Map<string, Review>>(new Map());
   const [announcement, setAnnouncement] = useState('');
   // Risk history for the 5-minute timeline: sampled once a second from the latest score, kept in this tab only.
   const [now, setNow] = useState(() => Date.now());
@@ -46,7 +47,7 @@ export default function App() {
     return () => clearInterval(tick);
   }, []);
   useEffect(() => {
-    const applyPipeline = (p: PipelineSnapshot) => { setRisk(p.risk); setFlagged(p.flagged); setClusters(p.clusters); setActions(p.actions); setMode(p.mode); setAi(p.ai); setSettings(p.settings); };
+    const applyPipeline = (p: PipelineSnapshot) => { setRisk(p.risk); setFlagged(p.flagged); setClusters(p.clusters); setActions(p.actions); setMode(p.mode); setAi(p.ai); setSettings(p.settings); setReviews(new Map((p.reviews ?? []).map(r => [r.messageId, r]))); };
     return connectDashboard({
       onSnapshot: snapshot => { setMessages(snapshot.messages); setChatStatus(snapshot.status); setDemo(snapshot.demo); setRaid(snapshot.demo?.lastRaid); if (snapshot.pipeline) applyPipeline(snapshot.pipeline); },
       onMessage: message => setMessages(previous => [...previous.filter(item => item.id !== message.id), message].slice(-4000)),
@@ -64,15 +65,10 @@ export default function App() {
       onSettings: setSettings,
       onAiStatus: setAi,
       onPipelineReset: p => { applyPipeline(p); setHistory([]); },
+      onReview: ({ messageId, review }) => setReviews(previous => { const next = new Map(previous); if (review) next.set(messageId, review); else next.delete(messageId); return next; }),
     });
   }, []);
   useEffect(() => { setAnnouncement(`Risk level ${levelInfo[risk.level].name}`); }, [risk.level]);
-  // After a click, a faint glow dissipates from the button's frame.
-  useEffect(() => {
-    const pulse = (e: MouseEvent) => { const b = (e.target as HTMLElement).closest('.btn'); if (!b) return; b.classList.remove('pulse'); void (b as HTMLElement).offsetWidth; b.classList.add('pulse'); };
-    document.addEventListener('click', pulse);
-    return () => document.removeEventListener('click', pulse);
-  }, []);
   // The local session cookie authorizes dashboard controls (demo mode works without a Twitch login).
   useEffect(() => { void fetch('/api/session').catch(() => {}); }, []);
   const demoOn = Boolean(demo?.enabled);
@@ -168,7 +164,7 @@ export default function App() {
       </div>
 
       {clusters.length > 0 && <SwarmView clusters={clusters} actions={actions} minUsers={minUsers} />}
-      <FlyFeed flagged={flagged} actions={actions} />
+      <FlyFeed flagged={flagged} actions={actions} reviews={reviews} chat={feed} onError={setControlError} />
 
       <div className="more">
         <details><summary>What Fly Swatter did <span className="num">{actions.length ? `· ${actions.length}` : ''}</span><Plus /></summary><ActionLog actions={actions} /></details>

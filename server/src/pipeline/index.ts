@@ -1,6 +1,6 @@
 import type { Bus } from '../bus.js';
 import type { Config } from '../config.js';
-import type { ActionRecord, ChatMessage, Flagged, Mode, PipelineSnapshot, PlaceCluster, RiskLevel, RiskState } from '../types.js';
+import type { ActionRecord, Category, ChatMessage, Flagged, Mode, PipelineSnapshot, PlaceCluster, Review, RiskLevel, RiskState, Verdict } from '../types.js';
 import { ActionEngine, type ModerationApi } from './actionEngine.js';
 import { Classifier, type AiClient } from './classifier.js';
 import { ChatContext, prefilter } from './prefilter.js';
@@ -30,6 +30,7 @@ export class Pipeline {
   private actions: ActionEngine;
   private flagged: Flagged[] = [];
   private actionLog: ActionRecord[] = [];
+  private reviews = new Map<string, Review>();   // mods' checks of the model's calls, by message id
   private level: RiskLevel = 'quiet';
   private lastRisk?: RiskState;
   private riskEmittedAt = 0;
@@ -66,7 +67,15 @@ export class Pipeline {
   setSwatAllGuesses(enabled: boolean) { this.actions.setSwatAllGuesses(enabled); this.options.bus.emit('settings', { swatAllGuesses: enabled }); }
   setShield(active: boolean) { return this.actions.setShield(active, this.options.isDemo()); }
   snapshot(): PipelineSnapshot {
-    return { settings: { swatAllGuesses: this.actions.getSwatAllGuesses() }, mode: this.actions.getMode(), risk: this.risk.state(), flagged: [...this.flagged], clusters: this.triangulation.snapshot(), actions: [...this.actionLog], ai: this.classifier.aiStatus() };
+    return { settings: { swatAllGuesses: this.actions.getSwatAllGuesses() }, mode: this.actions.getMode(), risk: this.risk.state(), flagged: [...this.flagged], clusters: this.triangulation.snapshot(), actions: [...this.actionLog], ai: this.classifier.aiStatus(), reviews: [...this.reviews.values()] };
+  }
+  /** Records a mod's verdict on a flagged message (null clears it). Returns false if the message isn't flagged. */
+  review(messageId: string, verdict: Verdict | null, shouldBe?: Category): boolean {
+    if (!this.flagged.some(f => f.message.id === messageId)) return false;
+    const review = verdict ? { messageId, verdict, ...(verdict === 'wrong' && shouldBe ? { shouldBe } : {}), at: this.now() } : null;
+    if (review) this.reviews.set(messageId, review); else this.reviews.delete(messageId);
+    this.options.bus.emit('review', { messageId, review });
+    return true;
   }
   async flush() { await this.classifier.flush(); }
 
@@ -88,7 +97,8 @@ export class Pipeline {
       this.syncTriangulation();
       this.risk.onClassification(flagged, { accountAgeDays: this.options.accountAgeDays(flagged.message.userId), questionPressure: pressure });
       if (flagged.classification.category !== 'benign') {
-        this.flagged.push(flagged); if (this.flagged.length > MAX_FLAGGED) this.flagged.shift();
+        this.flagged.push(flagged);
+        if (this.flagged.length > MAX_FLAGGED) this.reviews.delete(this.flagged.shift()!.message.id);
       }
       bus.emit('classification', flagged);
       this.emitClustersIfChanged(this.triangulation.snapshot(), true);
@@ -134,7 +144,7 @@ export class Pipeline {
   }
   reset() {
     this.classifier.reset(); this.triangulation.reset(); this.risk.reset(); this.actions.reset(); this.context.clear();
-    this.flagged = []; this.actionLog = []; this.level = 'quiet'; this.clusterSignature = '';
+    this.flagged = []; this.actionLog = []; this.reviews.clear(); this.level = 'quiet'; this.clusterSignature = '';
     this.options.bus.emit('pipeline.reset', this.snapshot());
   }
 }
