@@ -1,10 +1,10 @@
 import type { ActionRecord, Category, Mode, RiskLevel } from './socket';
 // Level names; each level also has its own shape (LevelMark), so colour is never the only signal (AGENTS.md §13.4).
 export const levelInfo: Record<RiskLevel, { name: string; detail: string }> = {
-  quiet: { name: 'Quiet', detail: 'Nobody is trying to find you.' },
+  quiet: { name: 'Quiet', detail: 'No strong location-seeking signals detected.' },
   few_flies: { name: 'A Few Flies', detail: 'A few people are curious where you are.' },
   buzzing: { name: 'Buzzing', detail: 'Chat is trying to work out where you are.' },
-  swarm: { name: 'Swarm Incoming', detail: 'Several people agree on where you are. Act now.' },
+  swarm: { name: 'Swarm Incoming', detail: 'Several people agree on a location guess. Check chat.' },
 };
 export const categoryLabel: Record<Category, string> = {
   location_question: 'Asked where', location_guess: 'Guessed a place', location_confirmation: 'Agreed with a guess', location_share: 'Shared a location',
@@ -17,7 +17,7 @@ export const categoryTone: Record<Category, '' | 'warning' | 'negative'> = {
 };
 export const modeInfo: Record<Mode, { name: string; detail: string }> = {
   observe: { name: 'Observe', detail: 'Only watches. Nothing gets deleted.' },
-  assist: { name: 'Assist', detail: 'Deletes messages that give away where you are, and warns your mods.' },
+  assist: { name: 'Assist', detail: 'Deletes shared locations, confident guesses and swarm messages, and alerts your mods.' },
   guardian: { name: 'Guardian', detail: 'Like Assist, plus deletes "where are you" questions when chat gets busy, warns repeat guessers, and locks down chat at Swarm.' },
 };
 export const actionLabel: Record<ActionRecord['kind'], string> = {

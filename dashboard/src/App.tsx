@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { connectDashboard, post, type ActionRecord, type AiStatus, type ChatMessage, type ChatStatus, type DemoState, type Flagged, type Mode, type PipelineSnapshot, type PlaceCluster, type RaidEvent, type Review, type RiskState, type Settings } from './socket';
+import { connectDashboard, ensureLocalSession, post, type ActionRecord, type AiStatus, type ChatMessage, type ChatStatus, type DemoState, type Flagged, type Mode, type PipelineSnapshot, type PlaceCluster, type RaidEvent, type Review, type RiskState, type Settings } from './socket';
 import { DemoControls } from './components/DemoControls';
 import { HISTORY_MS, RiskDetails, type RiskSample } from './components/RiskMeter';
 import { FlyFeed } from './components/FlyFeed';
@@ -70,7 +70,7 @@ export default function App() {
   }, []);
   useEffect(() => { setAnnouncement(`Risk level ${levelInfo[risk.level].name}`); }, [risk.level]);
   // The local session cookie authorizes dashboard controls (demo mode works without a Twitch login).
-  useEffect(() => { void fetch('/api/session').catch(() => {}); }, []);
+  useEffect(() => { void ensureLocalSession().catch(() => {}); }, []);
   const demoOn = Boolean(demo?.enabled);
   const feed = messages.filter(message => (message.source === 'demo') === demoOn);
   useEffect(() => {
@@ -96,10 +96,12 @@ export default function App() {
   const connectLabel = !auth?.connected ? 'Connect Twitch' : !auth.chatAuthorized ? 'Enable chat reading' : !auth.moderationAuthorized ? 'Enable moderation' : undefined;
   // Connection state as one quiet line of words; only a problem earns a tone.
   const statuses: { label: string; tone: Tone }[] = [
-    ...(demoOn ? [{ label: 'Practice mode', tone: 'warn' as Tone }] : []),
+    ...(demoOn ? [{ label: 'Practice mode', tone: 'warn' as Tone }, { label: 'Simulated viewers', tone: '' as Tone }] : [
     !auth?.configured ? { label: 'Twitch not set up', tone: '' } : auth.connected ? { label: `@${auth.login}`, tone: '' } : { label: 'Twitch signed out', tone: 'warn' },
     !socketConnected ? { label: 'Lost connection', tone: 'bad' } : chatStatus.state === 'connected' ? { label: 'Reading chat', tone: '' } : chatStatus.state === 'revoked' ? { label: 'Chat access removed', tone: 'bad' } : chatStatus.state === 'reconnecting' ? { label: 'Reconnecting', tone: 'warn' } : { label: 'Waiting for chat', tone: '' },
+    ] as { label: string; tone: Tone }[]),
     !ai ? { label: 'Starting', tone: '' } : ai.budgetReached ? { label: 'AI limit reached', tone: 'warn' } : !ai.enabled ? { label: 'Basic detection', tone: '' } : ai.healthy ? { label: 'AI detection', tone: '' } : { label: 'AI down, using basic', tone: 'warn' },
+    ...(demoOn && !socketConnected ? [{ label: 'Lost connection', tone: 'bad' as Tone }] : []),
   ];
   // Shield Mode state is the last successful shield action (dry runs count in demo, and are labelled).
   const shield = [...actions].reverse().find(a => (a.kind === 'shield_mode_on' || a.kind === 'shield_mode_off') && a.success);
@@ -112,15 +114,16 @@ export default function App() {
   const deletes = actions.filter(a => a.kind === 'delete_message');
   const swatted = deletes.filter(a => a.success && !a.dryRun).length, wouldSwat = deletes.filter(a => a.dryRun).length;
   const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-  const what = top?.isSwarm ? `${plural(top.distinctUsers, 'person', 'people')} in chat agree on ${placeKind[top.granularity]}.`
-    : top && top.distinctUsers >= 2 ? `${plural(top.distinctUsers, 'person', 'people')} guessed ${placeKind[top.granularity]}. It turns dangerous at ${minUsers}.`
+  const what = !socketConnected ? 'Connecting to the local server. Waiting for the latest chat state.'
+    : top?.isSwarm ? `${plural(top.distinctUsers, 'person', 'people')} in chat agree on ${placeKind[top.granularity]} guess. Its accuracy is unknown.`
+    : top && top.distinctUsers >= 2 ? `${plural(top.distinctUsers, 'person', 'people')} guessed the same place. A swarm needs at least ${minUsers} people and enough confidence.`
     : recent ? `${plural(recent, 'message', 'messages')} asked or guessed where you are in the last 5 minutes. They don't agree on a place.`
     : 'Nobody has asked where you are in the last 5 minutes.';
   const did = swatted ? ` Fly Swatter deleted ${plural(swatted, 'message', 'messages')}.`
     : wouldSwat ? ` It would have deleted ${plural(wouldSwat, 'message', 'messages')}, but this is ${demoOn ? 'practice mode' : 'Observe mode'}, so nothing was deleted.` : '';
 
   const info = levelInfo[risk.level];
-  return <div className={`app lv-${risk.level}`}>
+  return <div className={`app lv-${risk.level}${demoOn ? ' is-practice' : ''}`}>
     <div className="sr-only" aria-live="polite">{announcement}</div>
     <header className="top">
       <a className="brand" href="/" aria-label="Fly Swatter, home"><Mascot mood={risk.level} size={20} /></a>
@@ -168,7 +171,7 @@ export default function App() {
 
       <div className="more">
         <details><summary>What Fly Swatter did <span className="num">{actions.length ? `· ${actions.length}` : ''}</span><Plus /></summary><ActionLog actions={actions} /></details>
-        <details><summary>Settings<Plus /></summary><ResponsePanel mode={mode} settings={settings} ai={ai} moderationAuthorized={Boolean(auth?.moderationAuthorized)} demo={demoOn} loginUrl={health?.loginUrl} warnings={health?.warnings ?? []} onError={setControlError} /></details>
+        <details><summary>Settings<Plus /></summary><ResponsePanel mode={mode} settings={settings} ai={ai} moderationAuthorized={Boolean(auth?.moderationAuthorized)} demo={demoOn} loginUrl={health?.loginUrl} warnings={demoOn ? [] : health?.warnings ?? []} onError={setControlError} /></details>
       </div>
     </main>
     <footer className="foot"><span>Private. Never show on stream.</span><span>Built with OpenAI Codex</span></footer>

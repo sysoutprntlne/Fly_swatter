@@ -21,6 +21,65 @@ function flag(category: Category, opts: { confidence?: number; severity?: 0 | 1 
 const cluster = (ids: string[], canonical = 'maple avenue'): PlaceCluster => ({ id: 'c1', canonical, granularity: 'street', mentions: ids.map(id => ({ messageId: id, userId: id, userLogin: id, excerpt: '', category: 'location_guess', confidence: 0.4, weight: 0.4, at: clock })), distinctUsers: ids.length, score: 4, firstSeen: clock, lastSeen: clock, isSwarm: true });
 
 describe('action engine', () => {
+  it('practice Shield Mode never suppresses real Guardian protection', async () => {
+    const { api, engine } = setup('guardian');
+    await engine.setShield(true, true);
+    engine.reset();
+    await engine.onLevelChange('buzzing', 'swarm', false);
+    expect(api.setShieldMode).toHaveBeenCalledExactlyOnceWith(true);
+  });
+  it('an automatic practice lockdown stays separate from live lockdown', async () => {
+    const { api, engine } = setup('guardian');
+    await engine.onLevelChange('buzzing', 'swarm', true);
+    engine.reset();
+    await engine.onLevelChange('buzzing', 'swarm', false);
+    expect(api.setShieldMode).toHaveBeenCalledExactlyOnceWith(true);
+  });
+  it('practice ending lockdown does not erase knowledge of a real lockdown', async () => {
+    const { api, engine } = setup('guardian');
+    await engine.setShield(true, false);
+    await engine.setShield(false, true);
+    engine.reset();
+    await engine.onLevelChange('buzzing', 'swarm', false);
+    expect(api.setShieldMode).toHaveBeenCalledExactlyOnceWith(true);
+  });
+  it.each(['reset', 'observe'] as const)('stops pending swarm deletions after %s', async change => {
+    const { api, engine, records } = setup('assist');
+    const f = flag('location_guess', { confidence: 0.4 });
+    await engine.onFlagged(f, 'quiet');
+    let finish!: () => void;
+    api.sendChat.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const pending = engine.onSwarm(cluster([f.message.id]), false);
+    if (change === 'reset') engine.reset(); else engine.setMode('observe');
+    finish(); await pending;
+    expect(api.deleteMessage).not.toHaveBeenCalled();
+    if (change === 'reset') expect(records).toHaveLength(0);
+  });
+  it('does not enable Shield Mode from an old risk event after reset', async () => {
+    const { api, engine } = setup('guardian');
+    let finish!: () => void;
+    api.sendChat.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const pending = engine.onLevelChange('buzzing', 'swarm', false);
+    engine.reset(); finish(); await pending;
+    expect(api.setShieldMode).not.toHaveBeenCalled();
+  });
+  it('does not warn or record an old deletion after reset', async () => {
+    const { api, engine, records } = setup('guardian');
+    await engine.onFlagged(flag('location_share', { user: 'repeat' }), 'quiet');
+    let finish!: () => void;
+    api.deleteMessage.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const pending = engine.onFlagged(flag('location_share', { user: 'repeat' }), 'quiet');
+    engine.reset(); records.length = 0; finish(); await pending;
+    expect(api.warnUser).not.toHaveBeenCalled(); expect(records).toHaveLength(0);
+  });
+  it('Observe dry runs do not count toward real repeat-offender warnings', async () => {
+    const { api, engine } = setup('observe');
+    await engine.onFlagged(flag('location_share', { user: 'repeat' }), 'quiet');
+    engine.setMode('guardian');
+    await engine.onFlagged(flag('location_share', { user: 'repeat' }), 'quiet');
+    expect(api.deleteMessage).toHaveBeenCalledTimes(1);
+    expect(api.warnUser).not.toHaveBeenCalled();
+  });
   it('Observe mode only records dry runs', async () => {
     const { api, records, engine } = setup('observe');
     await engine.onFlagged(flag('location_share', { severity: 3 }), 'quiet');

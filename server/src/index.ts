@@ -28,8 +28,8 @@ try {
   const close = async () => {
     if (closing) return;
     closing = true;
-    await app.close();
     pipeline.stop();
+    await app.close();
     app.log.flush();
   };
   process.once('SIGINT', () => { void close(); });

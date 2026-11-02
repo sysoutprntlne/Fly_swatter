@@ -12,12 +12,14 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "demo": "npm run build && node scripts/demo.mjs",
     "build": "npm run build --workspaces",
     "start": "npm run start --workspace server",
     "typecheck": "npm run typecheck --workspaces",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "smoke": "node scripts/smoke.mjs",
     "eval": "npm run eval --workspace server",
     "check": "npm run typecheck && npm run lint && npm test && npm run build"
   },

@@ -10,3 +10,8 @@ coverage/
 *.log
 .DS_Store
 .taste-skill/
+
+# Local media: large files, licensed audio and source archives stay out of the repo.
+video/
+docs.zip
+docs/video-reference/

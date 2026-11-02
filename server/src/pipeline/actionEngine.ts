@@ -19,6 +19,9 @@ export class ActionEngine {
   private deletesByUser = new Map<string, number[]>();
   private known = new Map<string, Flagged>();    // flagged messages by id, for swarm deletions
   private shieldOn = false;
+  private demoShieldOn = false;
+  private generation = 0;
+  private policyRevision = 0;
   private counter = 0;
   // swatAllGuesses deletes every guess/confirmation/share regardless of confidence, so a deletion only ever
   // means "someone guessed" and never hints which guess the crowd agrees on.
@@ -26,7 +29,7 @@ export class ActionEngine {
   getSwatAllGuesses() { return this.swatAllGuesses; }
   setSwatAllGuesses(enabled: boolean) { this.swatAllGuesses = enabled; }
   getMode() { return this.mode; }
-  setMode(mode: Mode) { this.mode = mode; }
+  setMode(mode: Mode) { if (mode !== this.mode) this.policyRevision++; this.mode = mode; }
 
   async onFlagged(flagged: Flagged, level: RiskLevel, cluster?: PlaceCluster) {
     const { message, classification: c, prefilter } = flagged;
@@ -50,37 +53,47 @@ export class ActionEngine {
   }
   // A new swarm: alert mods once per cluster and swat every message that built it.
   async onSwarm(cluster: PlaceCluster, demo: boolean) {
+    const generation = this.generation, revision = this.policyRevision;
     if (this.swarmAlerted.has(cluster.id)) return;
     this.swarmAlerted.add(cluster.id);
     await this.alert('swarm', copy.modAlertSwarm, `Swarm formed: ${cluster.distinctUsers} chatters converged on one place`, demo);
     for (const mention of cluster.mentions) {
+      if (generation !== this.generation || revision !== this.policyRevision) return;
       const flagged = this.known.get(mention.messageId);
       if (flagged?.prefilter.deletable) await this.deleteFlagged(flagged, 'part of a converging swarm');
     }
   }
   async onLevelChange(from: RiskLevel, to: RiskLevel, demo: boolean) {
+    const generation = this.generation, revision = this.policyRevision;
     if (levelRank[to] <= levelRank[from]) return;
     if (to === 'buzzing') await this.alert('buzzing', copy.modAlertBuzzing, 'Risk rose to Buzzing', demo);
     if (to === 'swarm') {
       await this.alert('swarm', copy.modAlertSwarm, 'Risk rose to Swarm Incoming', demo);
-      if (this.mode === 'guardian' && !this.shieldOn) {
+      if (generation !== this.generation || revision !== this.policyRevision) return;
+      if (this.mode === 'guardian' && !(demo ? this.demoShieldOn : this.shieldOn)) {
         const record = await this.execute({ kind: 'shield_mode_on', reason: 'Guardian: risk reached Swarm Incoming', demo });
-        if (record?.success) this.shieldOn = true;
+        if (record?.success && !record.dryRun) this.shieldOn = true;
+        else if (record?.success && demo && generation === this.generation) this.demoShieldOn = true;
       }
     }
   }
   // Human-initiated Shield Mode toggle (auto-off is manual only).
   async setShield(active: boolean, demo: boolean) {
+    const generation = this.generation;
     const record = await this.execute({ kind: active ? 'shield_mode_on' : 'shield_mode_off', reason: active ? 'Turned on from the dashboard' : 'Turned off from the dashboard', demo, manual: true });
-    if (record?.success) this.shieldOn = active;
+    if (record?.success && !record.dryRun) this.shieldOn = active;
+    else if (record?.success && demo && generation === this.generation) this.demoShieldOn = active;
     return record;
   }
-  reset() { this.done.clear(); this.lastAlert.clear(); this.swarmAlerted.clear(); this.deletesByUser.clear(); this.known.clear(); }
+  reset() { this.generation++; this.demoShieldOn = false; this.done.clear(); this.lastAlert.clear(); this.swarmAlerted.clear(); this.deletesByUser.clear(); this.known.clear(); }
 
   private async deleteFlagged(flagged: Flagged, reason: string) {
+    const generation = this.generation, revision = this.policyRevision;
     const { message, classification } = flagged;
     const record = await this.execute({ kind: 'delete_message', targetMessageId: message.id, targetUserId: message.userId, reason: `Swatted ${classification.category.replace(/_/g, ' ')}: ${reason}`, demo: message.source === 'demo' });
-    if (!record?.success) return;
+    if (!record?.success || generation !== this.generation || revision !== this.policyRevision) return;
+    // Observed deletions must never become real warning history after changing mode.
+    if (record.dryRun && message.source !== 'demo') return;
     const now = this.now();
     const recent = (this.deletesByUser.get(message.userId) ?? []).filter(at => now - at <= WARN_WINDOW_MS);
     recent.push(now); this.deletesByUser.set(message.userId, recent);
@@ -100,6 +113,7 @@ export class ActionEngine {
 
   // Single choke point: dry-run, idempotency and error capture are enforced here and nowhere else.
   async execute(action: PlannedAction): Promise<ActionRecord | undefined> {
+    const generation = this.generation;
     const key = action.targetMessageId ? `${action.kind}:${action.targetMessageId}` : undefined;
     if (key && this.done.has(key)) return undefined;
     if (key) { this.done.add(key); if (this.done.size > 10_000) this.done.delete(this.done.values().next().value!); }
@@ -120,7 +134,8 @@ export class ActionEngine {
         record.error = error instanceof Error ? error.message.slice(0, 200) : 'Action failed';
       }
     }
-    try { this.onRecord(record); } catch { /* recording must not break moderation */ }
+    // Requests already sent cannot be undone, but must not repopulate a reset session.
+    if (generation === this.generation) try { this.onRecord(record); } catch { /* recording must not break moderation */ }
     return record;
   }
 }

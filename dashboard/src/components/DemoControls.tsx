@@ -17,6 +17,7 @@ export function DemoControls({ state, raid, onError }: { state: DemoState; raid?
   }, [onError]);
   // Follow the scenario the server is playing, so the picker never names a different one.
   useEffect(() => { if (state.scenario) setSelected(state.scenario); }, [state.scenario]);
+  useEffect(() => { setSpeed(state.speed); }, [state.speed]);
   const run = (url: string, body: unknown) => { onError(''); post(url, body).catch((e: Error) => onError(e.message)); };
   const changeSpeed = (next: DemoSpeed) => { setSpeed(next); if (state.playing && state.scenario) run('/api/demo/play', { name: state.scenario, speed: next }); };
   const inject = (event: FormEvent) => {
@@ -27,6 +28,7 @@ export function DemoControls({ state, raid, onError }: { state: DemoState; raid?
   };
   const resuming = state.scenario === selected && !state.playing && !state.finished && state.position > 0;
   return <section className="demo-strip" aria-label="Demo controls">
+    <p className="demo-notice">Fictional chat. All moderation actions are practice; Twitch stays unchanged.</p>
     <select className="field" aria-label="Scenario" value={selected} onChange={e => setSelected(e.target.value)}>
       {scenarios.map(s => <option key={s.name} value={s.name}>{s.name} · {Math.round(s.durationMs / 1000)} s</option>)}
     </select>

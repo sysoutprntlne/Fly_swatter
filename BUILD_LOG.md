@@ -271,3 +271,53 @@ The user asked for a place where mods can cross-check whether the model was righ
 - **Not built, by decision:** video clips. Twitch Clips were ruled out because clips are public and would publish the revealing moment (AGENTS.md §2.3). Local OBS replay-buffer clips remain possible later as an opt-in, because §2.7 says no frames go to disk by default.
 - Rule reasons that repeated the category label were reworded (e.g. "Phrased as a guess and names a place").
 - **Tests.** `server/test/review.test.ts` (3 tests): verdict set, replace and clear with bus events; only flagged messages accepted; cleared on reset; the route checks cookie and origin, validates input and returns 404. 196 tests pass. Driven end to end in a browser: opened a row, marked it wrong, picked "Asked where", and the server snapshot and the row tag agreed.
+
+## 2026-11-02 · Release hardening under the two-hour shipping brief
+
+**Request.** Assess the existing app and ship a dependable local release within a two-hour budget. Prioritized the existing MVP and its release checks; kept stretch features outside this pass. Preserved existing README edits, videos and reference artifacts.
+
+**Fixed.** Practice Shield Mode no longer changes the action engine's knowledge of real Shield Mode. An automatic practice lockdown previously marked the live state as enabled, suppressing later Guardian protection; a practice unlock could erase knowledge of a real lockdown. Real state and practice state are now separate, with practice state cleared on reset. Observe dry-run deletions no longer accumulate real repeat-offender warnings.
+
+Reset and mode changes now invalidate pending swarm follow-ups. Reset/stop also prevent a completed old classification from emitting a swarm, prevent pending action records from repopulating a cleared session, and clear trailing risk notifications. In-flight AI responses from before reset cannot update classifier status or cache; cached classifications are cleared between sessions, while call-budget history is retained. Shutdown stops the pipeline before closing the HTTP app. Requests already sent to Twitch cannot be undone.
+
+**Release checks.** Added `npm run smoke`, which launches the compiled server on an isolated loopback port with Twitch/OpenAI credentials explicitly disabled. Through real HTTP and WebSocket connections it verifies compiled dashboard assets, initial Observe mode, Guardian practice actions, complete IRL and benign scenario playback, swarm/risk broadcasts, review verdicts, reset and foreign-origin rejection. It closes its own server afterward and leaves local credentials untouched. Added `docs/RELEASE.md` and corrected the README's live test: three low-confidence rules-only guesses do not necessarily meet the score threshold; five distinct viewers do. A separate fictional address provides a two-account deletion check.
+
+Initial `npm run check` exposed lint scanning the untracked presentation video tree (including a bundled third-party library). Excluded `video/` from application lint, without changing the video files. The sandbox initially prevented local WebSocket binds; reran with loopback permission.
+
+**Evidence.** `npm run check`: 209 tests passed across 20 files, type checks and lint passed, both production workspaces built. Production smoke passed. Held-out rules-only evaluation, run with the API key explicitly disabled: 94% exact-category non-benign precision, 8% benign false positives, 79% risky-message detection (31 examples). No tuning against the held-out examples. Added 13 regression tests for practice/live state separation, cancellation, dry-run warning history and classifier reset behavior. No API paths, scopes or models changed in this pass.
+
+**Remaining gates.** M7 real-channel moderation acceptance and M8 first-time-viewer understanding are still unverified. This pass does not claim live Twitch or browser visual acceptance. No OBS, raid/account-age lookup, panic, incident reports, overlay or sound features added.
+
+## 2026-11-02 · Assist deletion verified on Twitch
+
+Guided the user through the live moderation check. Initial test messages came from the broadcaster account: the running pipeline correctly marked them non-deletable and produced private alerts. Confirmed Assist was selected, Practice was disabled and moderation permissions were granted. After instructions to send from a separate non-moderator viewer account, the user reported it working. The local action log independently confirmed a successful `delete_message` with `dryRun: false` while Assist was active and demo mode was off.
+
+Updated README and release status to reflect this partial M7 acceptance. Live multi-user convergence and public mod-alert content remain pending, as do Guardian live behaviors and M8 first-time-viewer acceptance. No application code changed for this verification.
+
+## 2026-11-02 · Requested automated verification after live deletion
+
+The user asked Codex to test the app for them. Reran `npm run check`: all 209 tests across 20 files, type checks, lint and both production builds passed. Reran `npm run smoke` against a separate production server with credentials disabled: built assets, HTTP/WebSocket, simulated swarm, Guardian dry-run protection, review verdicts, reset, benign scenario and origin rejection passed. No application code changed. This verifies simulated multi-viewer behavior; the five-account live Twitch swarm/mod-alert check and first-time-viewer acceptance remain pending.
+
+## 2026-11-02 · Production demo preparation
+
+**Request.** Make the app ready to present for the Codex hackathon. Kept the existing local MVP and visual design, with an independent offline presentation workflow.
+
+**Launch and rehearsal.** Added `npm run demo`: builds the production workspaces, then starts `scripts/demo.mjs` on localhost:3100 (custom port supported by the script). The launcher explicitly disables Twitch/OpenAI credentials, avoids loading the saved broadcaster session, overrides behavior settings for repeatable rules-only playback, and leaves `.env` untouched. It starts in Observe with Practice enabled, forwards shutdown signals and reports missing builds or invalid ports. The production smoke test now exercises this launcher and asserts that Twitch is unconfigured/disconnected and paid AI is disabled. Added `docs/DEMO.md` with a 90-second pitch, controls, recovery, current evidence and feature boundaries. Updated README/release instructions and the fictional screenshot.
+
+**Dashboard.** Practice shows simulated viewers and a direct statement that Twitch stays unchanged. Live Twitch setup warnings stay out of the practice presentation. The title and fly occupy separate vertical space in Practice, preserving the fly while avoiding text overlap on phones. Added the original swatter as a favicon after browser QA caught the missing default icon. Fixed playback speed synchronization between dashboards. Reworded location findings as unverified guesses and explained that both viewer count and confidence determine a swarm; the screen never claims chat found the real location.
+
+**Reliability.** Dashboard controls share local-session bootstrap, so a first click waits for the cookie. After a server restart rejects an old cookie, a control renews the local session and retries once. Added three regression tests covering shared initialization, restart recovery and bounded retries.
+
+**Verification.** `npm run check` passed with 212 tests across 21 files, types, lint and production builds. The production smoke passed through the new launcher. Rebuilt and linted the final CSS/favicon changes. Headless Chrome drove the built UI through Assist practice, speed selection, pause/resume, full IRL swarm, review verdict, reset and the harmless scenario. Verified keyboard focus, no horizontal overflow at 1440/768/390, light/dark and reduced-motion rendering, and no browser errors. Screenshots inspected and saved under `.taste-skill/release-demo/`; `docs/demo.png` refreshed with fictional chat only. Stopped the owned preview server after QA.
+
+**Design check.** Applied design-taste-frontend and retained the existing Data terminal direction (seed 695119143), IBM Plex Mono and original fly, with no redraw. The screen's question is whether chat is converging on a guess; the risk figure answers first, the fly remains the product's face and the clusters supply evidence. Inspector: 0 FAIL, 3 WARN. Kept prior documented allowances for micro labels, the existing font, monospace and small metadata. Warnings are justified: the 56px score is the one leading danger figure; a Quiet zero trace stays neutral; the border warning ignores rgba alpha (the checker forces alpha to 1), while the actual low-opacity rules remain quiet in the screenshots. Source taste lint: 0 FAIL; inherited mono and button press shadows retained.
+
+Live multi-account swarm/public alerts, Guardian live behavior and first-time-viewer acceptance remain pending. Browser QA does not replace those checks. No external API contracts or model names changed, and no public hosting or OBS/stretch features were added.
+
+## 2026-11-02 · Launch film, gallery and public-repo preparation
+
+Done with Claude Code, not Codex. Built a launch film with HyperFrames from real practice-mode captures, Kokoro narration and catalog music. Made brand images in `docs/brand/` and explanatory Devpost images in `docs/gallery/`, using dashboard crops from the offline practice server. All footage uses fictional chat.
+
+Before publishing, scanned the working tree and history for secret patterns and the local Twitch credentials and tokens: no matches. Added the MIT license notice for the vendored `design-taste-frontend` skill. `video/`, `docs.zip` and `docs/video-reference/` stay local because of size and unverified music licensing. `npm run check` passes with 212 tests, and the production smoke test passes.
+
+Tool history to confirm before publishing claims about it: local Codex sessions for this project are dated Oct 28 and Nov 2, and Claude Code sessions are dated Oct 28, Oct 30–31 and Nov 2. Live swarm and mod-alert acceptance remains pending.

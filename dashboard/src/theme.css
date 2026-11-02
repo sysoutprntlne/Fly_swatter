@@ -75,6 +75,7 @@ a { color: inherit; text-underline-offset: 3px; }
 
 /* Demo: one quiet line under the top. */
 .demo-strip { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 18px; padding: 0 var(--pad) 8px; }
+.demo-notice { flex-basis: 100%; text-align: center; color: var(--muted); font-size: 12px; }
 .demo-strip form { display: flex; gap: 8px; align-items: center; }
 .field { height: 30px; padding: 0 10px; border: 0; border-bottom: 1px solid var(--hair-2); background: transparent; min-width: 0; transition: border-color .3s var(--ease); }
 .field:hover, .field:focus { border-bottom-color: rgba(var(--ink-rgb), .45); outline: none; }
@@ -112,7 +113,10 @@ main { max-width: calc(var(--column) + 2 * var(--pad)); margin: 0 auto; padding:
 .hero { position: relative; height: min(52vh, 520px); min-height: 320px; margin: 0 calc(-1 * var(--pad)); }
 .hero canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .hero canvas.dragging { cursor: grabbing; }
-.specimen-title { position: absolute; top: 8%; left: 0; right: 0; text-align: center; pointer-events: none; }
+.is-practice .hero { height: auto; min-height: 0; padding-top: 20px; }
+.is-practice .specimen-title { position: static; }
+.is-practice .hero canvas { height: 220px; }
+.specimen-title { position: absolute; top: 8%; left: 0; right: 0; padding: 0 var(--pad); text-align: center; pointer-events: none; }
 .specimen-title h2 { font-weight: 500; font-size: 10.5px; letter-spacing: .42em; padding-left: .42em; color: rgba(var(--ink-rgb), .55); }
 .specimen-title .tagline { margin-top: 10px; text-transform: none; letter-spacing: .02em; padding-left: 0; font-size: 11px; color: var(--muted); }
 .specimen-title p { margin-top: 8px; font-size: 10px; letter-spacing: .3em; padding-left: .3em; color: rgba(var(--ink-rgb), .42); }

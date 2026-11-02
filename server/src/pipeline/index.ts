@@ -39,6 +39,7 @@ export class Pipeline {
   private unsubscribers: (() => void)[] = [];
   private clusterSignature = '';
   private demoEnabled: boolean;
+  private generation = 0;
   private now: () => number;
   constructor(private options: PipelineOptions) {
     this.now = options.now ?? Date.now;
@@ -61,7 +62,7 @@ export class Pipeline {
     );
   }
   start() { this.tick = setInterval(() => this.onTick(), this.options.tickMs ?? 1000); this.tick.unref(); }
-  stop() { if (this.tick) clearInterval(this.tick); if (this.riskTimer) clearTimeout(this.riskTimer); this.classifier.reset(); for (const off of this.unsubscribers) off(); }
+  stop() { this.generation++; if (this.tick) clearInterval(this.tick); if (this.riskTimer) clearTimeout(this.riskTimer); this.classifier.reset(); this.actions.reset(); for (const off of this.unsubscribers) off(); }
   mode() { return this.actions.getMode(); }
   setMode(mode: Mode) { this.actions.setMode(mode); this.options.bus.emit('mode', mode); }
   setSwatAllGuesses(enabled: boolean) { this.actions.setSwatAllGuesses(enabled); this.options.bus.emit('settings', { swatAllGuesses: enabled }); }
@@ -89,6 +90,7 @@ export class Pipeline {
     } catch { this.options.log?.('Prefilter failed for one message'); }
   }
   private async onClassified(flagged: Flagged) {
+    const generation = this.generation;
     try {
       if ((flagged.message.source === 'demo') !== this.options.isDemo()) return;
       const { bus } = this.options;
@@ -104,6 +106,7 @@ export class Pipeline {
       this.emitClustersIfChanged(this.triangulation.snapshot(), true);
       this.updateRisk();
       await this.actions.onFlagged(flagged, this.level, cluster);
+      if (generation !== this.generation) return;
       if (becameSwarm && cluster) { bus.emit('cluster.swarm', cluster); await this.actions.onSwarm(cluster, flagged.message.source === 'demo'); }
     } catch { this.options.log?.('Pipeline failed for one classification'); }
   }
@@ -143,6 +146,9 @@ export class Pipeline {
     this.options.bus.emit('action.taken', record);
   }
   reset() {
+    this.generation++;
+    if (this.riskTimer) clearTimeout(this.riskTimer);
+    this.riskTimer = undefined; this.lastRisk = undefined; this.riskEmittedAt = 0;
     this.classifier.reset(); this.triangulation.reset(); this.risk.reset(); this.actions.reset(); this.context.clear();
     this.flagged = []; this.actionLog = []; this.reviews.clear(); this.level = 'quiet'; this.clusterSignature = '';
     this.options.bus.emit('pipeline.reset', this.snapshot());

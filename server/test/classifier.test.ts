@@ -43,6 +43,31 @@ describe('rules fallback QA regressions', () => {
   });
 });
 describe('classifier batching and AI', () => {
+  it('clears cached practice classifications on reset', async () => {
+    const ai = echoAi(); const { classifier, results } = setup(ai);
+    classifier.enqueue(item('is that the CVS on Maple Ave?'));
+    await vi.advanceTimersByTimeAsync(2000);
+    classifier.reset();
+    classifier.enqueue(item('is that the CVS on Maple Ave?'));
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(ai.classify).toHaveBeenCalledTimes(2); expect(results).toHaveLength(2);
+  });
+  it.each(['resolve', 'reject'] as const)('ignores an AI request that completes after reset (%s)', async outcome => {
+    const ai = echoAi(); const { classifier, results, statuses } = setup(ai);
+    let finish!: () => void;
+    ai.classify.mockImplementationOnce((request: { candidates: { id: string }[] }) => new Promise((resolve, reject) => {
+      finish = () => outcome === 'reject' ? reject(new Error('old failure')) : resolve({ items: request.candidates.map(c => ({ messageId: c.id, category: 'location_guess', confidence: 0.9, severity: 2, place: null, rationale: 'old result' })) });
+    }));
+    classifier.enqueue(item('is that the CVS on Maple Ave?'));
+    await vi.advanceTimersByTimeAsync(2000);
+    classifier.reset(); finish();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(results).toHaveLength(0); expect(statuses).toHaveLength(0);
+    classifier.enqueue(item('is that the CVS on Maple Ave?'));
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(ai.classify).toHaveBeenCalledTimes(2);
+    expect(results).toHaveLength(1);
+  });
   it('works with no AI at all', async () => {
     const { classifier, results } = setup();
     classifier.enqueue(item('what city is that'));

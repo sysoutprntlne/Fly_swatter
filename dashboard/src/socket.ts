@@ -1,4 +1,4 @@
-import type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, Review, RiskLevel, RiskState, Settings } from '../../server/src/types';
+import type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, Review, RiskLevel, RiskState, Settings } from '../../server/src/types.js';
 export type { ActionRecord, AiStatus, Category, ChatMessage, ChatSnapshot, ChatStatus, DemoScenarioSummary, DemoSpeed, DemoState, Flagged, Mode, PipelineSnapshot, PlaceCluster, RaidEvent, Review, RiskLevel, RiskState, Settings };
 export interface DashboardHandlers {
   onSnapshot: (snapshot: ChatSnapshot) => void;
@@ -62,9 +62,20 @@ export function connectDashboard(handlers: DashboardHandlers) {
   connect();
   return () => { stopped = true; clearTimeout(retry); clearTimeout(watchdog); socket.close(); };
 }
-// Mutating routes need the local session cookie (fetched once on load) and a same-origin request.
+let localSession: Promise<void> | undefined;
+// Share bootstrap across controls so a first click cannot race the session cookie.
+export function ensureLocalSession(): Promise<void> {
+  localSession ??= fetch('/api/session').then(response => {
+    if (!response.ok) throw new Error('Could not connect to the local session.');
+  }).catch(error => { localSession = undefined; throw error; });
+  return localSession;
+}
+// A server restart rotates the cookie. A rejected request has not changed state, so refresh once.
 export async function post<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  await ensureLocalSession();
+  const send = () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  let response = await send();
+  if (response.status === 403) { localSession = undefined; await ensureLocalSession(); response = await send(); }
   const data = await response.json().catch(() => ({})) as T & { error?: string };
   if (!response.ok) throw new Error(data.error ?? 'Request failed.');
   return data;

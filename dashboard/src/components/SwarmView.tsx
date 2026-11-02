@@ -21,7 +21,7 @@ export function SwarmView({ clusters, actions, minUsers }: { clusters: PlaceClus
         <Lane flies={flies} minUsers={minUsers} />
       </li>;
     })}</ul>
-    <p className="lane-note">Each fly is one person. The line marks danger: {minUsers} or more people agreeing.</p>
+    <p className="lane-note">Each fly is one person. The line marks the minimum of {minUsers} people; confidence also counts toward a swarm.</p>
   </section>;
 }
 
@@ -29,7 +29,7 @@ function Lane({ flies, minUsers }: { flies: { id: string; login: string; state: 
   const shown = flies.slice(0, MAX_FLIES);
   const slots = Math.min(MAX_FLIES, Math.max(minUsers + 1, shown.length));
   const label = (state: string) => state === 'swatted' ? 'message deleted' : state === 'would' ? 'would be deleted (practice)' : 'message still in chat';
-  return <div className="lane" role="img" aria-label={`${flies.length} people, danger at ${minUsers}: ${flies.map(f => `${f.login} ${label(f.state)}`).join(', ')}`}>
+  return <div className="lane" role="img" aria-label={`${flies.length} people, swarm needs at least ${minUsers} people and enough confidence: ${flies.map(f => `${f.login} ${label(f.state)}`).join(', ')}`}>
     {Array.from({ length: slots }, (_, i) => {
       const fly = shown[i];
       return <span key={fly?.id ?? `slot-${i}`} style={{ display: 'contents' }}>

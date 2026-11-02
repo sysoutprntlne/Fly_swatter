@@ -16,10 +16,10 @@ export function sureness(confidence: number): string {
   return confidence < .45 ? 'Not sure' : confidence < .7 ? 'Fairly sure' : 'Very sure';
 }
 
-/** What a place guess narrows down, as part of a sentence ("the street you're on"). */
+/** Describe the guess's precision without implying that it is correct. */
 export const placeKind: Record<Granularity, string> = {
-  none: 'a place', country: 'your country', region: 'your region', city: 'your city', neighborhood: 'your neighbourhood',
-  street: "the street you're on", venue: "the place you're at", exact: 'your exact spot',
+  none: 'a place', country: 'a country', region: 'a region', city: 'a city', neighborhood: 'a neighbourhood',
+  street: 'a street', venue: 'a venue', exact: 'an exact location',
 };
 
 const deletedWhat: Record<string, string> = {

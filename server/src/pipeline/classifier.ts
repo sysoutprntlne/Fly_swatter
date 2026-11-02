@@ -106,7 +106,7 @@ export class Classifier {
     if (generation !== this.generation) return; // reset happened mid-flight
     batch.forEach((item, i) => this.deliver(item, results[i]!));
   }
-  reset() { this.generation++; this.queue = []; if (this.timer !== undefined) this.timers.clearTimeout(this.timer); this.timer = undefined; }
+  reset() { this.generation++; this.queue = []; this.cache.clear(); if (this.timer !== undefined) this.timers.clearTimeout(this.timer); this.timer = undefined; }
   private deliver(item: Item, classification: Classification) {
     try { this.options.onResult({ ...item, classification }); } catch { /* one bad consumer must not stop the pipeline */ }
   }
@@ -116,6 +116,7 @@ export class Classifier {
     this.status = merged; this.options.onStatus({ ...merged });
   }
   private async classifyBatch(batch: Item[]): Promise<Classification[]> {
+    const generation = this.generation;
     const fallback = () => batch.map(item => rulesClassify(item.message, item.prefilter));
     const ai = this.options.ai;
     const now = this.timers.now();
@@ -131,6 +132,7 @@ export class Classifier {
     };
     try {
       const raw = await ai.classify(request, AbortSignal.timeout(this.options.timeoutMs));
+      if (generation !== this.generation) return [];
       const items = z.object({ items: z.array(z.unknown()) }).parse(raw).items;
       const byId = new Map<string, z.infer<typeof aiItem>>();
       for (const candidate of items) { const parsed = aiItem.safeParse(candidate); if (parsed.success && ids.has(parsed.data.messageId)) byId.set(parsed.data.messageId, parsed.data); }
@@ -145,6 +147,7 @@ export class Classifier {
         return classification;
       });
     } catch {
+      if (generation !== this.generation) return [];
       this.aiDownUntil = this.timers.now() + RETRY_AI_MS;
       this.setStatus({ healthy: false, message: 'AI unavailable: using rules, retrying in 60 s.' });
       return fallback();

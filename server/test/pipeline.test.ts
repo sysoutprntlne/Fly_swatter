@@ -11,8 +11,39 @@ function setup(isDemo = false) {
   const moderation = { deleteMessage: vi.fn(async () => {}), sendChat: vi.fn(async () => {}), warnUser: vi.fn(async () => {}), setShieldMode: vi.fn(async () => {}) };
   const pipeline = new Pipeline({ bus, config: parseConfig({ LOG_LEVEL: 'silent' }), moderation, isDemo: () => isDemo, streamer: () => 's', accountAgeDays: () => undefined, now: () => Date.now() });
   pipeline.start();
-  return { bus, pipeline };
+  return { bus, pipeline, moderation };
 }
+it('reset cancels a trailing risk update from the previous session', async () => {
+  const { bus, pipeline } = setup();
+  const riskUpdates = vi.fn(); bus.on('risk.updated', riskUpdates);
+  bus.emit('chat.message', msg('a', 'what city is that'));
+  await vi.advanceTimersByTimeAsync(0);
+  bus.emit('chat.message', msg('b', 'what street is that'));
+  await vi.advanceTimersByTimeAsync(0);
+  pipeline.reset(); riskUpdates.mockClear();
+  await vi.advanceTimersByTimeAsync(300);
+  expect(riskUpdates).not.toHaveBeenCalled();
+  expect(pipeline.snapshot().risk.score).toBe(0);
+  pipeline.stop();
+});
+it('reset during a deletion prevents an old classification from emitting a swarm', async () => {
+  const { bus, pipeline, moderation } = setup();
+  pipeline.setMode('assist');
+  const swarms = vi.fn(); bus.on('cluster.swarm', swarms);
+  let finish!: () => void;
+  moderation.deleteMessage.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+  for (const id of ['a', 'b', 'c', 'd', 'e']) {
+    bus.emit('chat.message', msg(id, 'is that the CVS on Maple Ave?'));
+    await vi.advanceTimersByTimeAsync(0);
+  }
+  expect(moderation.deleteMessage).toHaveBeenCalled();
+  pipeline.reset(); finish();
+  await vi.advanceTimersByTimeAsync(0);
+  expect(swarms).not.toHaveBeenCalled();
+  expect(pipeline.snapshot().actions).toHaveLength(0);
+  expect(pipeline.snapshot().flagged).toHaveLength(0);
+  pipeline.stop();
+});
 it('pushes cluster expiry to the dashboard when mentions age out (QA regression)', async () => {
   const { bus, pipeline } = setup();
   const updates: PlaceCluster[][] = []; bus.on('cluster.updated', c => updates.push(c));
