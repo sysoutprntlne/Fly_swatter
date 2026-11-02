@@ -1,5 +1,13 @@
 # Local release procedure
 
+## Public source release
+
+The initial public preview is `v0.1.0`. Download the tagged source or clone the repository, install with `npm ci` on Node.js 22.12+, then run `npm run demo` for the offline presentation. No accounts or API keys are needed for the demo. This release distributes source; it does not host the private dashboard.
+
+GitHub Actions runs type checks, lint, tests, production builds and the credential-free smoke test on main and pull requests. Keep `.env`, saved tokens, incident reports and local video material out of commits and release attachments. The release notes must retain the live-verification limitations below.
+
+## Local verification
+
 Fly Swatter ships as a private local app. The release candidate has offline regression and production smoke coverage. Assist deletion passed on a real Twitch channel; live swarm/mod-alert and first-time-viewer acceptance remain pending.
 
 ## Build and rehearse

@@ -321,3 +321,11 @@ Done with Claude Code, not Codex. Built a launch film with HyperFrames from real
 Before publishing, scanned the working tree and history for secret patterns and the local Twitch credentials and tokens: no matches. Added the MIT license notice for the vendored `design-taste-frontend` skill. `video/`, `docs.zip` and `docs/video-reference/` stay local because of size and unverified music licensing. `npm run check` passes with 212 tests, and the production smoke test passes.
 
 Tool history to confirm before publishing claims about it: local Codex sessions for this project are dated Oct 28 and Nov 2, and Claude Code sessions are dated Oct 28, Oct 30–31 and Nov 2. Live swarm and mod-alert acceptance remains pending.
+
+## 2026-11-02 · Public GitHub release preparation with Codex
+
+The user requested a public GitHub release. Inspected the clean release branch and existing private origin, fetched remote state, and scanned all 241 reachable history blobs for common credential patterns and exact local Twitch/OpenAI credential values without printing them. No matches, tracked private runtime files or blobs over 50 MiB were found. Local video material remains excluded.
+
+Added GitHub Actions for reproducible Node 22 installation, type checks, lint, tests, production builds and the credential-free production smoke. Documented the initial v0.1.0 public preview as a source release with the dashboard remaining local. The sandbox blocks loopback test servers; release verification therefore runs with loopback permission. Existing live swarm/mod-alert, Guardian and first-time-viewer acceptance limitations remain explicit. No application behavior, API contracts or model names changed.
+
+Release verification passed: all 212 tests across 21 files, type checks, lint, both production builds and the real HTTP/WebSocket production smoke (swarm, dry-run protection, reviews, reset, benign scenario and origin rejection).
